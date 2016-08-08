@@ -523,40 +523,6 @@
   (add-hook 'magit-post-refresh-hook 'diff-hl-magit-post-refresh)
 
 #+END_SRC
-*** Generic Programming
-**** Require Flycheck
-#+BEGIN_SRC emacs-lisp
-  (milk-require-package 'flycheck)
-  (with-eval-after-load 'flycheck
-    (setq-default flycheck-disabled-checkers '(emacs-lisp-checkdoc)))
-#+END_SRC
-**** { } Smartparen Return Opens Indented Line
-#+BEGIN_SRC emacs-lisp
-  (sp-pair "{" nil :post-handlers
-           '(((lambda (&rest _ignored)
-                (crux-smart-open-line-above)) "RET")))
-#+END_SRC
-**** Define Prog-Mode Hook
-#+BEGIN_SRC emacs-lisp
-  (setq milk-flyspell +1)
-  (defun milk-prog-mode-defaults ()
-    "Default coding hook, useful with any programming language."
-    (when (and (executable-find ispell-program-name)
-               milk-flyspell)
-      (flyspell-prog-mode))
-    (smartparens-mode +1)
-    (flycheck-mode)
-    (milk-enable-whitespace)
-    (font-lock-add-keywords
-     nil '(("\\<\\(\\(FIX\\(ME\\)?\\|TODO\\|OPTIMIZE\\|HACK\\|REFACTOR\\):\\)"
-            1 font-lock-warning-face t))))
-#+END_SRC
-**** Set Prog-Mode Hook
-#+BEGIN_SRC emacs-lisp
-  (setq milk-prog-mode-hook 'milk-prog-mode-defaults)
-  (add-hook 'prog-mode-hook (lambda ()
-                              (run-hooks 'milk-prog-mode-hook)))
-#+END_SRC
 *** Configure General Modes
 **** Org-Mode
 #+BEGIN_SRC emacs-lisp
@@ -679,6 +645,41 @@
   (add-hook 'after-init-hook '(lambda () (ido-mode +1)))
 #+END_SRC
 ** Programming
+*** Generic Programming
+**** Require Flycheck
+#+BEGIN_SRC emacs-lisp
+  (milk-require-package 'flycheck)
+  (with-eval-after-load 'flycheck
+    (setq-default flycheck-disabled-checkers '(emacs-lisp-checkdoc)))
+#+END_SRC
+**** { } Smartparen Return Opens Indented Line
+#+BEGIN_SRC emacs-lisp
+  (sp-pair "{" nil :post-handlers
+           '(((lambda (&rest _ignored)
+                (crux-smart-open-line-above)) "RET")))
+#+END_SRC
+**** Define Prog-Mode Hook
+#+BEGIN_SRC emacs-lisp
+  (setq milk-flyspell +1)
+  (defun milk-prog-mode-defaults ()
+    "Default coding hook, useful with any programming language."
+    (when (and (executable-find ispell-program-name)
+               milk-flyspell)
+      (flyspell-prog-mode))
+    (smartparens-mode +1)
+    (flycheck-mode)
+    (milk-enable-whitespace)
+    (font-lock-add-keywords
+     nil '(("\\<\\(\\(FIX\\(ME\\)?\\|TODO\\|OPTIMIZE\\|HACK\\|REFACTOR\\):\\)"
+            1 font-lock-warning-face t))))
+#+END_SRC
+**** Set Prog-Mode Hook
+#+BEGIN_SRC emacs-lisp
+  (setq milk-prog-mode-hook 'milk-prog-mode-defaults)
+  (add-hook 'prog-mode-hook (lambda ()
+                              (run-hooks 'milk-prog-mode-hook)))
+#+END_SRC
+
 *** Company
 **** Require Company
 #+BEGIN_SRC emacs-lisp
