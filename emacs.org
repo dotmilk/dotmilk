@@ -1,0 +1,956 @@
+#+STARTUP: hideblocks
+* .milk
+** Base
+*** Pre-Configuration Fun
+**** Get User
+#+BEGIN_SRC emacs-lisp
+  (defvar current-user
+    (getenv
+     (if (equal system-type 'windows-nt) "USERNAME" "USER")))
+#+END_SRC
+**** Use Newest Byte Code
+#+BEGIN_SRC emacs-lisp
+  (setq load-prefer-newer t)
+#+END_SRC
+**** You On Old Emacs?
+#+BEGIN_SRC emacs-lisp
+  (when (version< emacs-version "24.4")
+    (error "You need to be on atleast 24.4, but your bitch ass is running %s" emacs-version))
+#+END_SRC
+**** Define Idempotent Make Dir
+#+BEGIN_SRC emacs-lisp
+  (defun milk-idem-make-dir (a-dir)
+    (unless (file-exists-p a-dir)
+      (make-directory a-dir)))
+#+END_SRC
+**** Add Subfolders To Load Path
+#+BEGIN_SRC emacs-lisp
+  (defun milk-add-subfolders-to-load-path (parent-dir)
+   "Add all level PARENT-DIR subdirs to the `load-path'."
+   (dolist (f (directory-files parent-dir))
+     (let ((name (expand-file-name f parent-dir)))
+       (when (and (file-directory-p name)
+                  (not (string-prefix-p "." f)))
+         (add-to-list 'load-path name)
+         (milk-add-subfolders-to-load-path name)))))
+#+END_SRC
+*** Setup Directories
+**** Root Dir Of Milk
+#+BEGIN_SRC emacs-lisp
+  (defvar milk-dir (file-name-directory load-file-name))
+  ;(defvar milk-dir "~/.emacs.d")
+#+END_SRC
+**** Installed Packages Dir
+#+BEGIN_SRC emacs-lisp
+  (defvar milk-package-dir (expand-file-name "elpa" milk-dir))
+  (milk-idem-make-dir milk-package-dir)
+#+END_SRC
+**** Private Dir
+#+BEGIN_SRC emacs-lisp
+  (defvar milk-private-dir (expand-file-name "private" milk-dir))
+  (milk-idem-make-dir milk-private-dir)
+#+END_SRC
+**** Vendor Dir
+#+BEGIN_SRC emacs-lisp
+  (defvar milk-vendor-dir (expand-file-name "vendor" milk-dir))
+  (milk-idem-make-dir milk-vendor-dir)
+#+END_SRC
+**** Savefile Dir
+#+BEGIN_SRC emacs-lisp
+  (defvar milk-savefile-dir (expand-file-name "savefile" milk-dir))
+  (milk-idem-make-dir milk-savefile-dir)
+#+END_SRC
+**** Custom File
+#+BEGIN_SRC emacs-lisp
+  (setq custom-file (expand-file-name "custom.el" milk-private-dir))
+#+END_SRC
+**** Add Shit Above To 'load-path'
+#+BEGIN_SRC emacs-lisp
+  (add-to-list 'load-path milk-vendor-dir)
+  (add-to-list 'load-path milk-private-dir)
+  (milk-add-subfolders-to-load-path milk-vendor-dir)
+  (milk-add-subfolders-to-load-path milk-private-dir)
+#+END_SRC
+*** Sane Reset
+**** Font
+#+BEGIN_SRC emacs-lisp
+  (setq default-frame-alist
+        '((font . "Source Code Pro for Powerline")
+          (vertical-scroll-bars . nil)))
+#+END_SRC
+**** Disable Tool Bar
+#+BEGIN_SRC emacs-lisp
+  (tool-bar-mode 0)
+#+END_SRC
+**** Disable Menu Bar
+#+BEGIN_SRC emacs-lisp
+  (menu-bar-mode 0)
+#+END_SRC
+**** Disable Scroll Bar
+#+BEGIN_SRC emacs-lisp
+  (scroll-bar-mode 0)
+#+END_SRC
+**** Disable Blinking Cursor
+#+BEGIN_SRC emacs-lisp
+  (blink-cursor-mode 0)
+#+END_SRC
+**** Disable Startup Screen
+#+BEGIN_SRC emacs-lisp
+  (setq inhibit-startup-screen t)
+#+END_SRC
+**** Disable Bell
+#+BEGIN_SRC emacs-lisp
+  (setq ring-bell-function 'ignore)
+#+END_SRC
+**** Lubricate Scrolling
+#+BEGIN_SRC emacs-lisp
+  (setq scroll-margin 0
+        scroll-conservatively 100000
+        scroll-preserve-screen-position 1
+        auto-window-vscroll nil)
+#+END_SRC
+**** Basic Mode Line Settings
+#+BEGIN_SRC emacs-lisp
+  (line-number-mode t)
+  (column-number-mode t)
+  (size-indication-mode t)
+#+END_SRC
+**** Enable (y/n) Answers
+#+BEGIN_SRC emacs-lisp
+  (fset 'yes-or-no-p 'y-or-n-p)
+#+END_SRC
+*** Package Magic
+**** Setup Packages
+#+BEGIN_SRC emacs-lisp
+  (require 'cl)
+  (require 'package)
+  (setq package-user-dir milk-package-dir)
+  (add-to-list 'package-archives
+               '("melpa" . "https://melpa.org/packages/") t)
+  (package-initialize)
+#+END_SRC
+**** Muh Required Packages
+#+BEGIN_SRC emacs-lisp
+  (defvar milk-packages
+    '(anzu
+      beacon
+      browse-kill-ring
+      crux
+      diminish
+      expand-region
+      esup
+      projectile
+      smart-mode-line
+      smartparens
+      volatile-highlights
+      which-key
+      zop-to-char))
+#+END_SRC
+**** Packages Installed Predicate
+#+BEGIN_SRC emacs-lisp
+  (defun milk-packages-installed-p ()
+    (every #'package-installed-p milk-packages))
+#+END_SRC
+**** Function To Require A Package
+#+BEGIN_SRC emacs-lisp
+  (defun milk-require-package (package)
+    (unless (memq package milk-packages)
+      (add-to-list 'milk-packages package))
+    (unless (package-installed-p package)
+      (package-install package)))
+#+END_SRC
+**** Function To Ensure Packages Are Installed
+#+BEGIN_SRC emacs-lisp
+  (defun milk-require-packages (packages)
+    (mapc #'milk-require-package packages))
+#+END_SRC
+**** Function To Install Muh Required Packages
+#+BEGIN_SRC emacs-lisp
+  (defun milk-install-packages ()
+    (unless (milk-packages-installed-p)
+      (message "%s" "Please hold while package db refreshes...")
+      (package-refresh-contents)
+      (message "%s" " done.")
+      (milk-require-packages milk-packages)))
+
+#+END_SRC
+**** Add Some Personal Favorite Packages
+#+BEGIN_SRC emacs-lisp
+  (milk-require-package 'gruvbox-theme)
+  (milk-require-package 'org-bullets)
+  (milk-require-package 'smart-mode-line-powerline-theme)
+#+END_SRC
+**** Finally Install Those Packages
+#+BEGIN_SRC emacs-lisp
+  (milk-install-packages)
+#+END_SRC
+*** Visual Goodies
+**** Theme
+#+BEGIN_SRC emacs-lisp
+  (load-theme 'gruvbox t)
+#+END_SRC
+**** Smart Modeline
+#+BEGIN_SRC emacs-lisp
+  (require 'smart-mode-line)
+  (setq sml/no-confirm-load-theme t
+        sml/theme 'smart-mode-line-powerline)
+  (add-hook 'after-init-hook #'sml/setup)
+#+END_SRC
+**** Setup Powerline
+#+BEGIN_SRC emacs-lisp
+  (setq powerline-default-separator 'bar)
+#+END_SRC
+**** Keep Modeline Tidy
+#+BEGIN_SRC emacs-lisp
+  (require 'diminish)
+#+END_SRC
+**** Show Cursor On Big Move
+#+BEGIN_SRC emacs-lisp
+  (require 'beacon)
+  (beacon-mode +1)
+#+END_SRC
+**** Show Available Keybindings On Chord Start
+#+BEGIN_SRC emacs-lisp
+  (require 'which-key)
+  (which-key-mode +1)
+#+END_SRC
+**** Useful Frame Title
+#+BEGIN_SRC emacs-lisp
+  (setq frame-title-format
+        '("" invocation-name " -> " (:eval (if (buffer-file-name)
+                                              (abbreviate-file-name (buffer-file-name))
+                                            "%b"))))
+#+END_SRC
+**** Meaningful Buffer Names For Same Name
+#+BEGIN_SRC emacs-lisp
+  (require 'uniquify)
+  (setq uniquify-buffer-name-style 'forward)
+  (setq uniquify-separator "/")
+  (setq uniquify-after-kill-buffer-p t)    ; rename after killing uniquified
+  (setq uniquify-ignore-buffers-re "^\\*") ; don't muck with special buffers
+#+END_SRC
+**** Highlight Current Line
+#+BEGIN_SRC emacs-lisp
+(global-hl-line-mode +1)
+#+END_SRC
+**** Volatile Highlights
+#+BEGIN_SRC emacs-lisp
+  (require 'volatile-highlights)
+  (volatile-highlights-mode t)
+  (diminish 'volatile-highlights-mode)
+#+END_SRC
+*** Assorted Helpers
+**** Smartparen Wrapper
+#+BEGIN_SRC emacs-lisp
+  (defun milk-wrap-with (s)
+    `(lambda (&optional arg)
+       (interactive "P")
+       (sp-wrap-with-pair ,s)))
+#+END_SRC
+**** Advise-Commands Macro
+#+BEGIN_SRC emacs-lisp
+  (defmacro advise-commands (advice-name commands class &rest body)
+    "Apply advice named ADVICE-NAME to multiple COMMANDS.
+  The body of the advice is in BODY."
+    `(progn
+       ,@(mapcar (lambda (command)
+                   `(defadvice ,command (,class ,(intern (concat (symbol-name command) "-" advice-name)) activate)
+                      ,@body))
+                 commands)))
+#+END_SRC
+**** Start Or Switch To
+#+BEGIN_SRC emacs-lisp
+  (defun milk-start-or-switch-to (function buffer-name)
+    (if (not (get-buffer buffer-name))
+        (progn
+          (split-window-sensibly (selected-window))
+          (other-window 1)
+          (funcall function))
+      (switch-to-buffer-other-window buffer-name)))
+#+END_SRC
+*** Sane Editing
+**** Require Undo-tree
+#+BEGIN_SRC emacs-lisp
+  (milk-require-package 'undo-tree)
+#+END_SRC
+**** Fucking Tabs And Indents
+#+BEGIN_SRC emacs-lisp
+  (defvar milk-yank-indent-threshold 1000)
+  (defvar milk-indent-sensitive-modes
+    '(conf-mode coffee-mode haml-mode python-mode slim-mode yaml-mode))
+  (defvar milk-yank-indent-modes '(LaTeX-mode TeX-mode))
+  (setq-default indent-tabs-mode nil)
+  (setq-default tab-width 8)
+
+  (require 'tabify)
+  (defmacro with-region-or-buffer (func)
+    `(defadvice ,func (before with-region-or-buffer activate compile)
+       (interactive
+        (if mark-active
+            (list (region-beginning) (region-end))
+          (list (point-min) (point-max))))))
+
+  (with-region-or-buffer indent-region)
+  (with-region-or-buffer untabify)
+
+  (defun yank-advised-indent-function (beg end)
+    (if (<= (- end beg) milk-yank-indent-threshold)
+        (indent-region beg end nil)))
+
+  (advise-commands "indent" (yank yank-pop) after
+    (if (and (not (ad-get-arg 0))
+             (not (member major-mode milk-indent-sensitive-modes))
+             (or (derived-mode-p 'prog-mode)
+                 (member major-mode milk-yank-indent-modes)))
+        (let ((transient-mark-mode nil))
+          (yank-advised-indent-function (region-beginning) (region-end)))))
+#+END_SRC
+**** Newline At EOF
+#+BEGIN_SRC emacs-lisp
+  (setq require-final-newline t)
+#+END_SRC
+**** Delete Selected With Keypress
+#+BEGIN_SRC emacs-lisp
+(delete-selection-mode t)
+#+END_SRC
+**** Store Backups And Autosaves In TMP Dir
+#+BEGIN_SRC emacs-lisp
+  (setq backup-directory-alist
+        `((".*" . ,temporary-file-directory)))
+  (setq auto-save-file-name-transforms
+        `((".*" ,temporary-file-directory t)))
+#+END_SRC
+**** Autosave Undo-Tree History
+#+BEGIN_SRC emacs-lisp
+  (setq undo-tree-history-directory-alist
+        `((".*" . ,temporary-file-directory)))
+  (setq undo-tree-auto-save-history t)
+#+END_SRC
+**** Autorevert Buffers When Changed Externally
+#+BEGIN_SRC emacs-lisp
+  (global-auto-revert-mode t)
+#+END_SRC
+**** Hippie Magic
+#+BEGIN_SRC emacs-lisp
+  (setq hippie-expand-try-functions-list
+        '(try-expand-dabbrev
+          try-expand-dabbrev-all-buffers
+          try-expand-dabbrev-from-kill
+          try-complete-file-name-partially
+          try-complete-file-name
+          try-expand-all-abbrevs
+          try-expand-list
+          try-expand-line
+          try-complete-lisp-symbol-partially
+          try-complete-lisp-symbol))
+#+END_SRC
+**** Smart Tab Behavior
+#+BEGIN_SRC emacs-lisp
+  (setq tab-always-indent 'complete)
+#+END_SRC
+**** Smart Smartparen
+#+BEGIN_SRC emacs-lisp
+  (require 'smartparens-config)
+  (setq sp-base-key-bindings 'paredit)
+  (setq sp-autoskip-closing-pair 'always)
+  (setq sp-hybrid-kill-entire-symbol nil)
+  (sp-use-paredit-bindings)
+  (show-smartparens-global-mode +1)
+  (define-key prog-mode-map (kbd "M-(") (milk-wrap-with "("))
+  (define-key prog-mode-map (kbd "M-[") (milk-wrap-with "["))
+  (define-key prog-mode-map (kbd "M-\"") (milk-wrap-with "\""))
+  (setq blink-matching-paren nil)
+#+END_SRC
+**** Use Shit + Arrow Keys To Switch Visible Buffers
+#+BEGIN_SRC emacs-lisp
+  (require 'windmove)
+  (windmove-default-keybindings)
+#+END_SRC
+**** Saveplace When Saving Files
+#+BEGIN_SRC emacs-lisp
+  (require 'saveplace)
+  (setq save-place-file (expand-file-name "saveplace" milk-savefile-dir))
+  (setq-default save-place t) ; save places for all the things
+#+END_SRC
+**** Save Some History
+#+BEGIN_SRC emacs-lisp
+  (require 'savehist)
+  (setq savehist-additional-variables '(search-ring regexp-search-ring)
+        savehist-autosave-interval 60
+        savehist-file (expand-file-name "savehist" milk-savefile-dir))
+  (savehist-mode +1)
+#+END_SRC
+**** Save Recent Files
+#+BEGIN_SRC emacs-lisp
+  (require 'recentf)
+
+  (setq recentf-save-file (expand-file-name "recentf" milk-savefile-dir)
+        recentf-max-saved-items 500
+        recentf-max-menu-items 15
+        ;; disable recentf-cleanup on Emacs start, because it can cause
+        ;; problems with remote files
+        recentf-auto-cleanup 'never)
+
+  (defun milk-recentf-exclude-p (file)
+    (let ((file-dir (file-truename (file-name-directory file))))
+      (-any-p (lambda (dir)
+                (string-prefix-p dir file-dir))
+              (mapcar 'file-truename (list milk-savefile-dir package-user-dir)))))
+  (add-to-list 'recentf-exclude 'milk-recentf-exclude-p)
+
+  (recentf-mode +1)
+#+END_SRC
+**** Auto-Save On Buffer And Window Switch
+#+BEGIN_SRC emacs-lisp
+  (defvar milk-auto-save t) ; TODO later maybe custom group thing like prelude?
+  (defun milk-auto-save-command ()
+    (when (and milk-auto-save
+               buffer-file-name
+               (buffer-modified-p (current-buffer))
+               (file-writable-p buffer-file-name))
+      (save-buffer)))
+
+  (advise-commands "auto-save"
+                   (switch-to-buffer
+                    other-window
+                    windmove-up
+                    windmove-down
+                    windmove-left
+                    windmove-right)
+                   before
+                   (milk-auto-save-command))
+
+  (add-hook 'mouse-leave-buffer-hook 'milk-auto-save-command)
+  (add-hook 'focus-out-hook 'milk-auto-save-command)
+#+END_SRC
+**** Set Major Mode By auto-mode-list
+#+BEGIN_SRC emacs-lisp
+  (defadvice set-buffer-major-mode (after set-major-mode activate compile)
+    (let* ((name (buffer-name buffer))
+           (mode (assoc-default name auto-mode-alist 'string-match)))
+      (when (and mode (consp mode))
+        (setq mode (car mode)))
+      (with-current-buffer buffer (if mode (funcall mode)))))
+#+END_SRC
+**** Cut Line Without Marking It
+#+BEGIN_SRC emacs-lisp
+  (require 'rect)
+  (defadvice kill-region (before smart-cut activate compile)
+    "When called interactively with no active region, kill a single line instead."
+    (interactive
+     (if mark-active (list (region-beginning) (region-end) rectangle-mark-mode)
+       (list (line-beginning-position)
+             (line-beginning-position 2)))))
+#+END_SRC
+**** Get Dank Spellchecking Action
+#+BEGIN_SRC emacs-lisp
+  (require 'flyspell)
+  (setq ispell-program-name "aspell" ; use aspell instead of ispell
+        ispell-extra-args '("--sug-mode=ultra"))
+
+  (defun milk-enable-flyspell ()
+    (when (executable-find ispell-program-name)
+      (flyspell-mode +1)))
+
+  (add-hook 'text-mode-hook 'milk-enable-flyspell)
+#+END_SRC
+**** Clean Up Nasty Whitespace
+#+BEGIN_SRC emacs-lisp
+  (defun milk-enable-whitespace ()
+    (add-hook 'before-save-hook 'whitespace-cleanup)
+    (whitespace-mode +1))
+
+  (add-hook 'text-mode-hook 'milk-enable-whitespace)
+#+END_SRC
+**** Basic Narrowing
+#+BEGIN_SRC emacs-lisp
+  (put 'narrow-to-region 'disabled nil)
+  (put 'narrow-to-page 'disabled nil)
+  (put 'narrow-to-defun 'disabled nil)
+#+END_SRC
+**** Change Region Case
+#+BEGIN_SRC emacs-lisp
+  (put 'upcase-region 'disabled nil)
+  (put 'downcase-region 'disabled nil)
+#+END_SRC
+**** Enable erase-buffer
+#+BEGIN_SRC emacs-lisp
+  (put 'erase-buffer 'disabled nil)
+#+END_SRC
+**** Setup Bookmarks
+#+BEGIN_SRC emacs-lisp
+  (require 'bookmark)
+  (setq bookmark-default-file (expand-file-name "bookmarks" milk-savefile-dir)
+        bookmark-save-flag 1)
+#+END_SRC
+**** Saner Regex Syntax
+#+BEGIN_SRC emacs-lisp
+  (require 're-builder)
+  (setq reb-re-syntax 'string)
+#+END_SRC
+**** Whitespace Config
+#+BEGIN_SRC emacs-lisp
+  (require 'whitespace)
+  (setq whitespace-line-column 80) ;; limit line length
+  (setq whitespace-style '(face tabs empty trailing lines-tail))
+#+END_SRC
+**** Make Scripts Executable On Save
+#+BEGIN_SRC emacs-lisp
+  (add-hook 'after-save-hook
+            'executable-make-buffer-file-executable-if-script-p)
+  (add-to-list 'auto-mode-alist '("\\.zsh\\'" . shell-script-mode))
+#+END_SRC
+**** No Active Region, Don't Activate Mark
+#+BEGIN_SRC emacs-lisp
+  (defadvice exchange-point-and-mark (before deactivate-mark activate compile)
+    (interactive
+     (list (not (region-active-p)))))
+#+END_SRC
+*** Generic Programming
+**** Require Flycheck
+#+BEGIN_SRC emacs-lisp
+  (milk-require-package 'flycheck)
+#+END_SRC
+**** { } Smartparen Return Opens Indented Line
+#+BEGIN_SRC emacs-lisp
+  (sp-pair "{" nil :post-handlers
+           '(((lambda (&rest _ignored)
+                (crux-smart-open-line-above)) "RET")))
+#+END_SRC
+**** Define Prog-Mode Hook
+#+BEGIN_SRC emacs-lisp
+  (setq milk-flyspell +1)
+  (defun milk-prog-mode-defaults ()
+    "Default coding hook, useful with any programming language."
+    (when (and (executable-find ispell-program-name)
+               milk-flyspell)
+      (flyspell-prog-mode))
+    (smartparens-mode +1)
+    (milk-enable-whitespace)
+    (font-lock-add-keywords
+     nil '(("\\<\\(\\(FIX\\(ME\\)?\\|TODO\\|OPTIMIZE\\|HACK\\|REFACTOR\\):\\)"
+            1 font-lock-warning-face t))))
+#+END_SRC
+**** Set Prog-Mode Hook
+#+BEGIN_SRC emacs-lisp
+  (setq milk-prog-mode-hook 'milk-prog-mode-defaults)
+  (add-hook 'prog-mode-hook (lambda ()
+                              (run-hooks 'milk-prog-mode-hook)))
+#+END_SRC
+*** Configure General Modes
+**** Org-Mode
+#+BEGIN_SRC emacs-lisp
+  (with-eval-after-load "org"
+    (require 'org-bullets)
+    (require 'ox-md nil t)
+    (require 'ox-gfm nil t)
+    (setq org-src-ask-before-returning-to-edit-buffer nil)
+    (add-to-list 'org-structure-template-alist
+                 '("se"
+                   "#+BEGIN_SRC emacs-lisp\n?\n#+END_SRC"
+                   "<src lang=\"emacs-lisp\">\n?\n</src>"))
+    (setq org-n-level-faces 3)
+    (setq org-hide-leading-stars t)
+    (setq org-bullets-bullet-list
+          '("☯" "☰" "☱" "☲" "☳" "☴" "☵" "☶" "☷"))
+    (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1))))
+
+#+END_SRC
+**** Projectile
+#+BEGIN_SRC emacs-lisp
+  (with-eval-after-load "projectile"
+    (local-set-key (kbd "M-p") 'projectile-command-map)
+    (setq projectile-cache-file
+          (expand-file-name  "projectile.cache" milk-savefile-dir)))
+#+END_SRC
+**** Anzu
+#+BEGIN_SRC emacs-lisp
+  (require 'anzu)
+  (diminish 'anzu-mode)
+  (global-anzu-mode)
+#+END_SRC
+**** Dired
+#+BEGIN_SRC emacs-lisp
+  (with-eval-after-load "dired"
+    ;; dired - reuse current buffer by pressing 'a'
+    (put 'dired-find-alternate-file 'disabled nil)
+    ;; always delete and copy recursively
+    (setq dired-recursive-deletes 'always)
+    (setq dired-recursive-copies 'always)
+    ;; if there is a dired buffer displayed in the next window, use its
+    ;; current subdir, instead of the current subdir of this dired buffer
+    (setq dired-dwim-target t)
+    ;; enable some really cool extensions like C-x C-j(dired-jump)
+    (require 'dired-x))
+#+END_SRC
+**** Ibuffer
+#+BEGIN_SRC emacs-lisp
+  (with-eval-after-load "ibuffer"
+    ;; Use human readable Size column instead of original one
+    (define-ibuffer-column size-h
+      (:name "Size" :inline t)
+      (cond
+       ((> (buffer-size) 1000000) (format "%7.1fM" (/ (buffer-size) 1000000.0)))
+       ((> (buffer-size) 100000) (format "%7.0fk" (/ (buffer-size) 1000.0)))
+       ((> (buffer-size) 1000) (format "%7.1fk" (/ (buffer-size) 1000.0)))
+       (t (format "%8d" (buffer-size)))))
+    ;; Modify the default ibuffer-formats
+    (setq ibuffer-formats
+          '((mark modified read-only " "
+                  (name 18 18 :left :elide)
+                  " "
+                  (size-h 9 -1 :right)
+                  " "
+                  (mode 16 16 :left :elide)
+                  " "
+                  filename-and-process)))
+    ;; Auto collapse some groups
+    (setq milk-ibuffer-collapsed-groups (list "Helm" "*Internal*"))
+    (defadvice ibuffer (after collapse-helm)
+      (dolist (group milk-ibuffer-collapsed-groups)
+        (progn
+          (goto-char 1)
+          (when (search-forward (concat "[ " group " ]") (point-max) t)
+            (progn
+              (move-beginning-of-line nil)
+              (ibuffer-toggle-filter-group)))))
+      (goto-char 1)
+      (search-forward "[ " (point-max) t))
+    (ad-activate 'ibuffer))
+#+END_SRC
+**** Ediff
+#+BEGIN_SRC emacs-lisp
+  ;; ediff - don't start another frame
+  (with-eval-after-load "ediff"
+    (setq ediff-window-setup-function 'ediff-setup-windows-plain))
+#+END_SRC
+**** Browse Kill Ring
+#+BEGIN_SRC emacs-lisp
+  (require 'browse-kill-ring)
+  (browse-kill-ring-default-keybindings)
+#+END_SRC
+**** Abbrev
+#+BEGIN_SRC emacs-lisp
+  (add-hook 'text-mode-hook 'abbrev-mode)
+#+END_SRC
+**** Eshell
+#+BEGIN_SRC emacs-lisp
+  (with-eval-after-load "eshell"
+    (message "%s" "EShell fired")
+    (setq eshell-directory-name (expand-file-name "eshell" milk-savefile-dir)))
+#+END_SRC
+**** Ido
+#+BEGIN_SRC emacs-lisp
+  (milk-require-packages '(flx-ido ido-ubiquitous smex))
+  (with-eval-after-load "ido"
+    (setq ido-enable-prefix nil
+          ido-enable-flex-matching t
+          ido-create-new-buffer 'always
+          ido-use-filename-at-point 'guess
+          ido-max-prospects 10
+          ido-save-directory-list-file (expand-file-name "ido.hist" milk-savefile-dir)
+          ido-default-file-method 'selected-window
+          ido-auto-merge-work-directories-length -1)
+    (ido-ubiquitous-mode +1)
+    (flx-ido-mode +1)
+    (setq ido-use-faces nil)
+    (setq smex-save-file (expand-file-name ".smex-items" milk-savefile-dir))
+    (smex-initialize))
+  (add-hook 'after-init-hook '(lambda () (ido-mode +1)))
+#+END_SRC
+** Programming
+*** Company
+**** Require Company
+#+BEGIN_SRC emacs-lisp
+  (milk-require-package 'company)
+  (require 'company)
+#+END_SRC
+**** Company Configuration
+#+BEGIN_SRC emacs-lisp
+  (setq company-idle-delay 0.5)
+  (setq company-tooltip-limit 10)
+  (setq company-minimum-prefix-length 2)
+  (setq company-tooltip-flip-when-above t)
+#+END_SRC
+**** Turn Company On
+#+BEGIN_SRC emacs-lisp
+  (global-company-mode 1)
+#+END_SRC
+*** Lisp
+**** Require Rainbow Parens
+#+BEGIN_SRC emacs-lisp
+  (milk-require-package 'rainbow-delimiters)
+#+END_SRC
+**** Define Generic Lisp Hook
+#+BEGIN_SRC emacs-lisp
+  (defun milk-lisp-coding-defaults ()
+    (smartparens-strict-mode +1)
+    (rainbow-delimiters-mode +1))
+  (setq milk-lisp-coding-hook 'milk-lisp-coding-defaults)
+#+END_SRC
+**** Define Generic Interactive Lisp Hook
+#+BEGIN_SRC emacs-lisp
+  (defun milk-interactive-lisp-coding-defaults ()
+    (smartparens-strict-mode +1)
+    (rainbow-delimiters-mode +1)
+    (whitespace-mode -1))
+  (setq milk-interactive-lisp-coding-hook 'milk-interactive-lisp-coding-defaults)
+#+END_SRC
+*** Elisp
+**** Require Elisp Stuff
+#+BEGIN_SRC emacs-lisp
+  (milk-require-packages '(elisp-slime-nav rainbow-mode))
+#+END_SRC
+**** Define Smartparens In Minibuffer
+#+BEGIN_SRC emacs-lisp
+  (defun conditionally-enable-smartparens-mode ()
+    (if (eq this-command 'eval-expression)
+        (smartparens-mode 1)))
+#+END_SRC
+**** Define Recompile On Save
+#+BEGIN_SRC emacs-lisp
+  (defun milk-recompile-elc-on-save ()
+    (add-hook 'after-save-hook
+              (lambda ()
+                (when (and
+                       (string-prefix-p milk-dir (file-truename buffer-file-name))
+                       (file-exists-p (byte-compile-dest-file buffer-file-name)))
+                  (emacs-lisp-byte-compile)))
+              nil
+              t))
+#+END_SRC
+**** Define Visit Ielm
+#+BEGIN_SRC emacs-lisp
+  (defun milk-visit-ielm ()
+    (interactive)
+    (milk-start-or-switch-to 'ielm "*ielm*"))
+#+END_SRC
+**** Define Don't Syntax Check In Tests
+#+BEGIN_SRC emacs-lisp
+  (defun milk-conditional-emacs-lisp-checker ()
+    (let ((file-name (buffer-file-name)))
+      (when (and file-name (string-match-p ".*-tests?\\.el\\'" file-name))
+        (setq-local flycheck-checkers '(emacs-lisp)))))
+#+END_SRC
+**** Define Elisp Defaults
+#+BEGIN_SRC emacs-lisp
+  (defun milk-emacs-lisp-mode-defaults ()
+    (run-hooks 'milk-lisp-coding-hook)
+    (eldoc-mode +1)
+    (milk-recompile-elc-on-save)
+    (rainbow-mode +1)
+    (setq mode-name "EL")
+    (milk-conditional-emacs-lisp-checker))
+
+  (setq milk-emacs-lisp-mode-hook 'milk-emacs-lisp-mode-defaults)
+#+END_SRC
+**** Define Ielm Defaults
+#+BEGIN_SRC emacs-lisp
+  (defun milk-ielm-mode-defaults ()
+    (run-hooks 'milk-interactive-lisp-coding-hook)
+    (eldoc-mode +1))
+
+  (setq milk-ielm-mode-hook 'milk-ielm-mode-defaults)
+#+END_SRC
+**** Set Elisp Hook
+#+BEGIN_SRC emacs-lisp
+  (add-hook 'emacs-lisp-mode-hook (lambda ()
+                                    (run-hooks 'milk-emacs-lisp-mode-hook)))
+#+END_SRC
+**** Set Ielm Hook
+#+BEGIN_SRC emacs-lisp
+  (add-hook 'ielm-mode-hook (lambda ()
+                              (run-hooks 'milk-ielm-mode-hook)))
+#+END_SRC
+**** Set Smartparens Minibuffer Hook
+#+BEGIN_SRC emacs-lisp
+  (add-hook 'minibuffer-setup-hook 'conditionally-enable-smartparens-mode)
+#+END_SRC
+**** Auto-Mode Cask
+#+BEGIN_SRC emacs-lisp
+  (add-to-list 'auto-mode-alist '("Cask\\'" . emacs-lisp-mode))
+#+END_SRC
+**** Diminish Some Things
+#+BEGIN_SRC emacs-lisp
+  (eval-after-load "elisp-slime-nav"
+    '(diminish 'elisp-slime-nav-mode))
+  (eval-after-load "rainbow-mode"
+    '(diminish 'rainbow-mode))
+  (eval-after-load "eldoc"
+    '(diminish 'eldoc-mode))
+#+END_SRC
+**** Enable Elisp Slime Nav
+#+BEGIN_SRC emacs-lisp
+  (dolist (hook '(emacs-lisp-mode-hook ielm-mode-hook))
+    (add-hook hook 'elisp-slime-nav-mode))
+#+END_SRC
+*** Common Lisp
+**** Require Common Lisp Stuff
+#+BEGIN_SRC emacs-lisp
+  (milk-require-package 'slime)
+#+END_SRC
+**** Auto-Mode for Sbclrc and .Cl
+#+BEGIN_SRC emacs-lisp
+  (add-to-list 'auto-mode-alist '("\\.sbclrc\\'" . lisp-mode))
+  (add-to-list 'auto-mode-alist '("\\.cl\\'" . lisp-mode))
+#+END_SRC
+**** Default To Sbcl
+#+BEGIN_SRC emacs-lisp
+  (setq slime-lisp-implementations
+        '((sbcl ("/usr/local/bin/sbcl" "--noinform") :coding-system utf-8-unix)))
+  (setq slime-default-lisp 'sbcl)
+#+END_SRC
+**** Fancy Slime Contribs
+#+BEGIN_SRC emacs-lisp
+  (setq slime-contribs '(slime-fancy))
+#+END_SRC
+**** Set Common Lisp Hook
+#+BEGIN_SRC emacs-lisp
+  (add-hook 'lisp-mode-hook (lambda () (run-hooks 'milk-lisp-coding-hook)))
+#+END_SRC
+**** Set Slime Hook
+#+BEGIN_SRC emacs-lisp
+  (add-hook 'slime-repl-mode-hook (lambda ()
+                                    (smartparens-strict-mode +1)
+                                    (whitespace-mode -1)))
+#+END_SRC
+**** Slime Settings After Load
+#+BEGIN_SRC emacs-lisp
+  (with-eval-after-load "slime"
+    (setq slime-complete-symbol-function 'slime-fuzzy-complete-symbol
+          slime-fuzzy-completion-in-place t
+          slime-enable-evaluate-in-emacs t
+          slime-autodoc-use-multiline-p t
+          slime-auto-start 'always))
+#+END_SRC
+**** Quicklisp Helper
+#+BEGIN_SRC emacs-lisp
+  (add-hook 'after-init-hook '(lambda ()
+                                (load (expand-file-name "~/quicklisp/slime-helper.el"))))
+#+END_SRC
+**** Inferior Lisp Program
+#+BEGIN_SRC emacs-lisp
+  (setq inferior-lisp-program "/usr/local/bin/sbcl")
+
+#+END_SRC
+*** Web
+**** Require Web-Mode
+#+BEGIN_SRC emacs-lisp
+  (milk-require-package 'web-mode)
+#+END_SRC
+**** Auto-Mode Various Web Related Files
+#+BEGIN_SRC emacs-lisp
+  (add-to-list 'auto-mode-alist '("\\.phtml\\'" . web-mode))
+  (add-to-list 'auto-mode-alist '("\\.tpl\\.php\\'" . web-mode))
+  (add-to-list 'auto-mode-alist '("\\.tpl\\'" . web-mode))
+  (add-to-list 'auto-mode-alist '("\\.blade\\.php\\'" . web-mode))
+  (add-to-list 'auto-mode-alist '("\\.jsp\\'" . web-mode))
+  (add-to-list 'auto-mode-alist '("\\.as[cp]x\\'" . web-mode))
+  (add-to-list 'auto-mode-alist '("\\.erb\\'" . web-mode))
+  (add-to-list 'auto-mode-alist '("\\.html?\\'" . web-mode))
+  (add-to-list 'auto-mode-alist
+               '("/\\(views\\|html\\|theme\\|templates\\)/.*\\.php\\'" . web-mode))
+#+END_SRC
+**** Play Nice With Smartparens
+#+BEGIN_SRC emacs-lisp
+  (setq web-mode-enable-auto-pairing nil)
+
+  (sp-with-modes '(web-mode)
+    (sp-local-pair "%" "%"
+                   :unless '(sp-in-string-p)
+                   :post-handlers '(((lambda (&rest _ignored)
+                                       (just-one-space)
+                                       (save-excursion (insert " ")))
+                                     "SPC" "=" "#")))
+    (sp-local-tag "%" "<% "  " %>")
+    (sp-local-tag "=" "<%= " " %>")
+    (sp-local-tag "#" "<%# " " %>"))
+#+END_SRC
+*** Elixir
+**** holder
+** Keys
+*** Globals
+**** Anzu
+#+BEGIN_SRC emacs-lisp
+  (global-set-key (kbd "M-%") 'anzu-query-replace)
+  (global-set-key (kbd "C-M-%") 'anzu-query-replace-regexp)
+#+END_SRC
+**** Smex
+#+BEGIN_SRC emacs-lisp
+  (global-set-key [remap execute-extended-command] 'smex)
+  (global-set-key (kbd "M-X") 'smex-major-mode-commands)
+#+END_SRC
+**** Hippie
+#+BEGIN_SRC emacs-lisp
+  (global-set-key (kbd "C-x C-b") 'ibuffer)
+#+END_SRC
+**** Zop 2 Char
+#+BEGIN_SRC emacs-lisp
+  (global-set-key [remap zap-to-char] 'zop-up-to-char)
+  (global-set-key (kbd "M-Z") 'zop-to-char)
+#+END_SRC
+**** Ibuffer
+#+BEGIN_SRC emacs-lisp
+  (global-set-key [remap list-buffers] 'ibuffer)
+#+END_SRC
+**** Fuck Off With The Fill
+#+BEGIN_SRC emacs-lisp
+  (global-set-key (kbd "C-x f") 'ido-find-file)
+#+END_SRC
+**** Fuck Suspend Buffer - Undo / Redo Instead
+#+BEGIN_SRC emacs-lisp
+  (defalias 'redo 'undo-tree-redo)
+  (global-set-key (kbd "C-z") 'undo)
+  (global-set-key (kbd "C-S-z") 'redo)
+#+END_SRC
+*** Define
+**** Ibuffer Occur
+#+BEGIN_SRC emacs-lisp
+  (define-key isearch-mode-map (kbd "C-o") 'isearch-occur)
+#+END_SRC
+**** Lisp
+#+BEGIN_SRC emacs-lisp
+  (define-key read-expression-map (kbd "TAB") 'completion-at-point)
+  ; Don't think these are needed
+  ;(define-key lisp-mode-shared-map (kbd "M-(") (milk-wrap-with "("))
+  ;(define-key lisp-mode-shared-map (kbd "M-\"") (milk-wrap-with "\""))
+#+END_SRC
+**** Elisp
+#+BEGIN_SRC emacs-lisp
+  (define-key emacs-lisp-mode-map (kbd "C-c C-z") 'milk-visit-ielm)
+  (define-key emacs-lisp-mode-map (kbd "C-c C-c") 'eval-defun)
+  (define-key emacs-lisp-mode-map (kbd "C-c C-b") 'eval-buffer)
+#+END_SRC
+**** Ielm
+#+BEGIN_SRC emacs-lisp
+  ;; (eval-after-load "ielm"
+  ;;   '(progn
+  ;;      (define-key ielm-map (kbd "M-(") (prelude-wrap-with "("))
+  ;;      (define-key ielm-map (kbd "M-\"") (prelude-wrap-with "\""))))
+#+END_SRC
+**** Slime
+#+BEGIN_SRC emacs-lisp
+  (with-eval-after-load "slime"
+    (define-key slime-mode-map (kbd "TAB") 'slime-indent-and-complete-symbol)
+    (define-key slime-mode-map (kbd "C-c C-s") 'slime-selector))
+#+END_SRC
+*** Help
+**** Display Manuals
+#+BEGIN_SRC emacs-lisp
+  (define-key 'help-command (kbd "C-i") 'info-display-manual)
+#+END_SRC
+**** Apropos
+#+BEGIN_SRC emacs-lisp
+  (define-key 'help-command "A" 'apropos)
+#+END_SRC
+**** Discover Muh Major
+#+BEGIN_SRC emacs-lisp
+  (define-key 'help-command (kbd "C-m") 'discover-my-major)
+#+END_SRC
+**** Find Various Things
+#+BEGIN_SRC emacs-lisp
+  (define-key 'help-command (kbd "C-f") 'find-function)
+  (define-key 'help-command (kbd "C-k") 'find-function-on-key)
+  (define-key 'help-command (kbd "C-v") 'find-variable)
+  (define-key 'help-command (kbd "C-l") 'find-library)
+#+END_SRC
