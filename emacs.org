@@ -136,9 +136,11 @@
       beacon
       browse-kill-ring
       crux
+      diff-hl
       diminish
       expand-region
       esup
+      magit
       projectile
       smart-mode-line
       smartparens
@@ -505,6 +507,18 @@
   (defadvice exchange-point-and-mark (before deactivate-mark activate compile)
     (interactive
      (list (not (region-active-p)))))
+#+END_SRC
+**** Sensible Undo
+#+BEGIN_SRC emacs-lisp
+  (global-undo-tree-mode)
+  (diminish 'undo-tree-mode)
+#+END_SRC
+**** Diff-hl
+#+BEGIN_SRC emacs-lisp
+  (global-diff-hl-mode +1)
+  (add-hook 'dired-mode-hook 'diff-hl-dired-mode)
+  (add-hook 'magit-post-refresh-hook 'diff-hl-magit-post-refresh)
+
 #+END_SRC
 *** Generic Programming
 **** Require Flycheck
