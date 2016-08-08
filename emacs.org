@@ -140,6 +140,9 @@
       diminish
       expand-region
       esup
+      gitattributes-mode
+      gitconfig-mode
+      gitignore-mode
       magit
       projectile
       smart-mode-line
@@ -524,6 +527,8 @@
 **** Require Flycheck
 #+BEGIN_SRC emacs-lisp
   (milk-require-package 'flycheck)
+  (with-eval-after-load 'flycheck
+    (setq-default flycheck-disabled-checkers '(emacs-lisp-checkdoc)))
 #+END_SRC
 **** { } Smartparen Return Opens Indented Line
 #+BEGIN_SRC emacs-lisp
@@ -540,6 +545,7 @@
                milk-flyspell)
       (flyspell-prog-mode))
     (smartparens-mode +1)
+    (flycheck-mode)
     (milk-enable-whitespace)
     (font-lock-add-keywords
      nil '(("\\<\\(\\(FIX\\(ME\\)?\\|TODO\\|OPTIMIZE\\|HACK\\|REFACTOR\\):\\)"
