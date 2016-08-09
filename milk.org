@@ -48,8 +48,7 @@
 *** Setup Directories
 **** Root Dir Of Milk
 #+BEGIN_SRC emacs-lisp
-  (defvar milk-dir (file-name-directory load-file-name))
-  ;(defvar milk-dir "~/.emacs.d")
+  (defvar milk-dir user-emacs-directory)
 #+END_SRC
 **** Installed Packages Dir
 #+BEGIN_SRC emacs-lisp
