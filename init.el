@@ -1,20 +1,13 @@
 (defconst emacs-start-time (current-time))
 (setq gc-cons-threshold 100000000)
-
+(defvar milk-dir user-emacs-directory)
+(defvar milk-org (expand-file-name "milk.org" milk-dir))
 (defvar milk-message-depth 2)
-(defvar milk-init-file (expand-file-name "milk.org" user-emacs-directory))
-(defvar milk-use-babel nil)
-
-
-(defun untangle-babel ()
-  (let ((file-name-handler-alist nil))
-    (org-babel-load-file
-     (expand-file-name "emacs.org" user-emacs-directory))))
 
 (defun untangle-custom ()
   (let ((file-name-handler-alist nil))
     (with-temp-buffer
-      (insert-file-contents milk-init-file)
+      (insert-file-contents milk-org)
       (goto-char (point-min))
       (search-forward "\n* .milk")
       (while (not (eobp))
@@ -34,9 +27,7 @@
          ((looking-at "^\\* ")
           (goto-char (point-max))))))))
 
-(if milk-use-babel
-    (untangle-babel)
-  (untangle-custom))
+(untangle-custom)
 
 (let ((elapsed (float-time (time-subtract (current-time)
 					  emacs-start-time))))
