@@ -363,6 +363,11 @@
     (milk-dont-lose-this start end)
     (delete-region start end))
 #+END_SRC
+**** Add To Auto-Mode-Alist
+#+BEGIN_SRC emacs-lisp
+  (defun milk-add-to-auto-mode (extension mode)
+    (add-to-list 'auto-mode-alist (cons extension mode) ))
+#+END_SRC
 *** Sane Editing
 **** Require Undo-tree
 #+BEGIN_SRC emacs-lisp
@@ -539,7 +544,7 @@
 #+END_SRC
 **** Get Dank Spellchecking Action
 #+BEGIN_SRC emacs-lisp
-  (require 'flyspell)
+                                          ;(require 'flyspell)
   (setq ispell-program-name "aspell" ; use aspell instead of ispell
         ispell-extra-args '("--sug-mode=ultra"))
 
@@ -637,6 +642,7 @@
     (require 'org-bullets)
     (require 'ox-md nil t)
     (require 'ox-gfm nil t)
+    ;(flyspell-mode +1)
     (setq org-src-ask-before-returning-to-edit-buffer nil)
     (add-to-list 'org-structure-template-alist
                  '("se"
@@ -767,14 +773,14 @@
 #+END_SRC
 **** Define Prog-Mode Hook
 #+BEGIN_SRC emacs-lisp
-  (setq milk-flyspell +1)
+  (defvar milk-flyspell 1)
   (defun milk-prog-mode-defaults ()
     "Default coding hook, useful with any programming language."
     (when (and (executable-find ispell-program-name)
                milk-flyspell)
       (flyspell-prog-mode))
     (smartparens-mode +1)
-    (aggressive-indent-mode)
+    (global-aggressive-indent-mode 1)
     (flycheck-mode)
     (milk-enable-whitespace)
     (font-lock-add-keywords
@@ -928,6 +934,14 @@
         '((sbcl ("/usr/local/bin/sbcl" "--noinform") :coding-system utf-8-unix)))
   (setq slime-default-lisp 'sbcl)
 #+END_SRC
+**** Define Slime Hook
+#+BEGIN_SRC emacs-lisp
+  (defun milk-slime-coding-defaults ()
+    (let ((quicklisp-helper (expand-file-name "~/quicklisp/slime-helper.el")))
+      (when (file-exists-p quicklisp-helper)))
+    (smartparens-strict-mode +1)
+    (whitespace-mode -1))
+#+END_SRC
 **** Fancy Slime Contribs
 #+BEGIN_SRC emacs-lisp
   (setq slime-contribs '(slime-fancy))
@@ -938,9 +952,7 @@
 #+END_SRC
 **** Set Slime Hook
 #+BEGIN_SRC emacs-lisp
-  (add-hook 'slime-repl-mode-hook (lambda ()
-                                    (smartparens-strict-mode +1)
-                                    (whitespace-mode -1)))
+  (add-hook 'slime-repl-mode-hook 'milk-slime-coding-defaults)
 #+END_SRC
 **** Slime Settings After Load
 #+BEGIN_SRC emacs-lisp
@@ -951,15 +963,9 @@
           slime-autodoc-use-multiline-p t
           slime-auto-start 'always))
 #+END_SRC
-**** Quicklisp Helper
-#+BEGIN_SRC emacs-lisp
-  (add-hook 'after-init-hook '(lambda ()
-                                (load (expand-file-name "~/quicklisp/slime-helper.el"))))
-#+END_SRC
 **** Inferior Lisp Program
 #+BEGIN_SRC emacs-lisp
   (setq inferior-lisp-program "/usr/local/bin/sbcl")
-
 #+END_SRC
 *** Web
 **** Require Web-Mode
@@ -995,7 +1001,43 @@
     (sp-local-tag "#" "<%# " " %>"))
 #+END_SRC
 *** Elixir
-**** holder
+**** Require Elixir Mode And Alchemist
+#+BEGIN_SRC emacs-lisp
+  (milk-require-packages '(elixir-mode
+                           alchemist))
+#+END_SRC
+**** Auto-Mode Elixir Files
+#+BEGIN_SRC emacs-lisp
+  (milk-add-to-auto-mode "\\.ex\\'" 'elixir-mode)
+  (milk-add-to-auto-mode "\\.exs\\'" 'elixir-mode)
+  (milk-add-to-auto-mode "\\.elixir\\'" 'elixir-mode)
+
+#+END_SRC
+**** Auto Close Do
+#+BEGIN_SRC emacs-lisp
+  (defun milk-elixir-do-end-close-action (id action context)
+    (when (eq action 'insert)
+      (newline-and-indent)
+      (previous-line)
+      (indent-according-to-mode)))
+
+  (sp-with-modes '(elixir-mode)
+    (sp-local-pair "do" "end"
+                   :when '(("SPC" "RET"))
+                   :post-handlers '(:add milk-elixir-do-end-close-action)
+                   :actions '(insert)))
+#+END_SRC
+**** Define Elixir Mode Hook
+#+BEGIN_SRC emacs-lisp
+  (defun milk-elixir-coding-defaults ())
+
+  (with-eval-after-load "elixir-mode"
+    (add-to-list 'aggressive-indent-excluded-modes 'elixir-mode))
+#+END_SRC
+**** Set Elixir Mode Hook
+#+BEGIN_SRC emacs-lisp
+  (add-hook 'elixir-mode-hook 'milk-elixir-coding-defaults)
+#+END_SRC
 *** Erlang
 **** Require Erlang
 #+BEGIN_SRC emacs-lisp
@@ -1039,7 +1081,7 @@
 #+BEGIN_SRC emacs-lisp
   (add-hook 'erlang-mode-hook 'milk-erlang-coding-defaults)
 #+END_SRC
-**** Set Distel Hook
+**** Set Distel Ho ok
 #+BEGIN_SRC emacs-lisp
   (when (and (file-exists-p (expand-file-name "distel" milk-vendor-dir))
              (file-exists-p (expand-file-name "company-distel" milk-vendor-dir)))
