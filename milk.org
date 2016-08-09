@@ -1041,7 +1041,9 @@
 #+END_SRC
 **** Set Distel Hook
 #+BEGIN_SRC emacs-lisp
-  (add-hook 'erlang-shell-mode-hook 'milk-erlang-shell-hook)
+  (when (and (file-exists-p (expand-file-name "distel" milk-vendor-dir))
+             (file-exists-p (expand-file-name "company-distel" milk-vendor-dir)))
+    (add-hook 'erlang-shell-mode-hook 'milk-erlang-shell-hook))
 #+END_SRC
 ** Keys
 *** Globals
