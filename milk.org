@@ -200,10 +200,12 @@
 #+END_SRC
 **** Add Some Personal Favorite Packages
 #+BEGIN_SRC emacs-lisp
-  (milk-require-package 'gruvbox-theme)
-  (milk-require-package 'seti-theme)
-  (milk-require-package 'org-bullets)
-  (milk-require-package 'smart-mode-line-powerline-theme)
+  (milk-require-packages '(monokai-theme
+                           gruvbox-theme
+                           seti-theme
+                           org-bullets
+                           smart-mode-line-powerline-theme))
+
 #+END_SRC
 **** Finally Install Those Packages
 #+BEGIN_SRC emacs-lisp
