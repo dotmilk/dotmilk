@@ -2,6 +2,7 @@
 (setq gc-cons-threshold 100000000)
 (defvar milk-dir user-emacs-directory)
 (defvar milk-org (expand-file-name "milk.org" milk-dir))
+(defvar milk-report-headers nil)
 (defvar milk-message-depth 2)
 
 (defun untangle-custom ()
@@ -14,9 +15,10 @@
         (forward-line 1)
         (cond
          ;; Report Headers
-         ((looking-at
-           (format "\\*\\{2,%s\\} +.*$"
-                   milk-message-depth))
+         ((and milk-report-headers
+               (looking-at
+                (format "\\*\\{2,%s\\} +.*$"
+                        milk-message-depth)))
           (message "%s" (match-string 0)))
          ;; Evaluate Code Blocks
          ((looking-at "^#\\+BEGIN_SRC +emacs-lisp *$")
