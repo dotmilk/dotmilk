@@ -632,14 +632,21 @@
 *** Blogging
 **** Autoload Export To Blag
 #+BEGIN_SRC emacs-lisp
-  (autoload 'endless/export-to-blog "ox-jekyll-subtree")
+  (when-files-exist ((expand-file-name "ox-jekyll-subtree/ox-jekyll-subtree.el"
+                                       milk-vendor-dir)
+                     (expand-file-name "ox-jekyll-subtree/ox-jekyll.el"
+                                       milk-vendor-dir))
+                    (autoload 'endless/export-to-blog "ox-jekyll-subtree"))
 #+END_SRC
 **** Wrap Export To Blag
 #+BEGIN_SRC emacs-lisp
   (defun export-to-blog ()
     "Export through endless/export-to-blog.  But don't show rendered html."
     (interactive)
-    (endless/export-to-blog t))
+    (if (or (autoloadp 'endless/export-to-blog)
+            (fboundp 'endless/export-to-blog))
+        (endless/export-to-blog t)
+      (milk-trace (format "Clone https://git.io/v6W2r into %s" milk-vendor-dir))))
 #+END_SRC
 **** Setup Blag Variables
 #+BEGIN_SRC emacs-lisp
