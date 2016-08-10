@@ -322,6 +322,29 @@
         (magit-blame-mode)
         (put 'milk-toggle-magit-blame 'state t))))
 #+END_SRC
+**** Sprunge
+#+BEGIN_SRC emacs-lisp
+  (defun milk-sprunge-this (start end)
+    (require 'request)
+    (interactive (if (use-region-p)
+                     (list (region-beginning) (region-end))
+                   (list nil nil)))
+    (let* ((was-selection (and start end))
+           (sprunge-url "http://sprunge.us")
+           (to-post (if was-selection
+                        (buffer-substring-no-properties start end)
+                      (buffer-substring-no-properties
+                       (point-min) (point-max)))))
+      (request
+       sprunge-url
+       :type "POST"
+       :data `(("sprunge" . ,to-post))
+       :parser (lambda ()
+                 (buffer-substring-no-properties (line-beginning-position)
+                                                 (line-end-position)))
+       :success (lambda (&rest args)
+                  (milk-trace (cadr args))))))
+#+END_SRC
 **** Don't Lose This
 #+BEGIN_SRC emacs-lisp
   (defvar milk-dont-lose-this-file-dir
