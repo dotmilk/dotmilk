@@ -1112,7 +1112,7 @@
 #+BEGIN_SRC emacs-lisp
   (add-hook 'erlang-mode-hook 'milk-erlang-coding-defaults)
 #+END_SRC
-**** Set Distel Ho ok
+**** Set Distel Hook
 #+BEGIN_SRC emacs-lisp
   (when-files-exist ((expand-file-name "distel" milk-vendor-dir)
                      (expand-file-name "company-distel" milk-vendor-dir))
