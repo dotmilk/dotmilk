@@ -367,6 +367,14 @@
   (defun milk-add-to-auto-mode (extension mode)
     (add-to-list 'auto-mode-alist (cons extension mode) ))
 #+END_SRC
+**** When Files Exist
+#+BEGIN_SRC emacs-lisp
+  (defmacro when-files-exist (list-of-files &rest body)
+    (let* ((predicates (mapcar (lambda (file)
+                                 `(file-exists-p ,file))
+                               list-of-files)))
+      `(when (and ,@predicates) ,@body)))
+#+END_SRC
 *** Sane Editing
 **** Require Undo-tree
 #+BEGIN_SRC emacs-lisp
@@ -670,7 +678,6 @@
     (setq org-bullets-bullet-list
           '("☯" "☰" "☱" "☲" "☳" "☴" "☵" "☶" "☷"))
     (add-hook 'org-mode-hook 'milk-org-mode-hook))
-
 #+END_SRC
 **** Projectile
 #+BEGIN_SRC emacs-lisp
@@ -1100,9 +1107,9 @@
 #+END_SRC
 **** Set Distel Ho ok
 #+BEGIN_SRC emacs-lisp
-  (when (and (file-exists-p (expand-file-name "distel" milk-vendor-dir))
-             (file-exists-p (expand-file-name "company-distel" milk-vendor-dir)))
-    (add-hook 'erlang-shell-mode-hook 'milk-erlang-shell-hook))
+  (when-files-exist ((expand-file-name "distel" milk-vendor-dir)
+                     (expand-file-name "company-distel" milk-vendor-dir))
+                    (add-hook 'erlang-shell-mode-hook 'milk-erlang-shell-hook))
 #+END_SRC
 ** Keys
 *** Globals
