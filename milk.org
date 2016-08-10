@@ -621,6 +621,23 @@
 #+BEGIN_SRC emacs-lisp
   (require 'expand-region)
 #+END_SRC
+*** Blogging
+**** Autoload Export To Blag
+#+BEGIN_SRC emacs-lisp
+  (autoload 'endless/export-to-blog "ox-jekyll-subtree")
+#+END_SRC
+**** Wrap Export To Blag
+#+BEGIN_SRC emacs-lisp
+  (defun export-to-blog ()
+    "Export through endless/export-to-blog.  But don't show rendered html."
+    (interactive)
+    (endless/export-to-blog t))
+#+END_SRC
+**** Setup Blag Variables
+#+BEGIN_SRC emacs-lisp
+  (defvar endless/blog-base-url "http://dotmilk.github.io")
+  (defvar endless/blog-dir (expand-file-name "~/milk/dotmilk.github.io/"))
+#+END_SRC
 *** Configure General Modes
 **** Org-Mode
 #+BEGIN_SRC emacs-lisp
@@ -641,7 +658,8 @@
     (require 'org-bullets)
     (require 'ox-md nil t)
     (require 'ox-gfm nil t)
-    ;(flyspell-mode +1)
+    (setq org-jekyll-use-src-plugin t)
+    (setq org-use-property-inheritance t)
     (setq org-src-ask-before-returning-to-edit-buffer nil)
     (add-to-list 'org-structure-template-alist
                  '("se"
@@ -1132,6 +1150,7 @@
   (global-set-key (kbd "\e M-SPC s") 'magit-status)
   (global-set-key (kbd "\e M-SPC l") 'magit-log-buffer-file)
   (global-set-key (kbd "\e M-SPC b") 'milk-toggle-magit-blame)
+  (global-set-key (kbd "\e M-SPC e") 'export-to-blog)
 #+END_SRC
 *** Define
 **** Ibuffer Occur
