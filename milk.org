@@ -1184,9 +1184,9 @@
 #+BEGIN_SRC emacs-lisp
   (global-set-key (kbd "\e M-SPC c") 'current-weather)
   (global-set-key (kbd "\e M-SPC f") 'forecast-weather)
-  (global-set-key (kbd "\e M-SPC s") 'magit-status)
-  (global-set-key (kbd "\e M-SPC l") 'magit-log-buffer-file)
-  (global-set-key (kbd "\e M-SPC b") 'milk-toggle-magit-blame)
+  (global-set-key (kbd "\e M-SPC m s") 'magit-status)
+  (global-set-key (kbd "\e M-SPC m l") 'magit-log-buffer-file)
+  (global-set-key (kbd "\e M-SPC m b") 'milk-toggle-magit-blame)
   (global-set-key (kbd "\e M-SPC e") 'export-to-blog)
 #+END_SRC
 *** Define
