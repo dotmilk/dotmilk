@@ -199,12 +199,8 @@
 #+END_SRC
 **** Add Some Personal Favorite Packages
 #+BEGIN_SRC emacs-lisp
-  (milk-require-packages '(monokai-theme
-                           gruvbox-theme
-                           seti-theme
-                           org-bullets
-                           smart-mode-line-powerline-theme))
-
+  (milk-require-packages '(darkokai-theme
+                           org-bullets))
 #+END_SRC
 **** Finally Install Those Packages
 #+BEGIN_SRC emacs-lisp
@@ -213,7 +209,8 @@
 *** Visual Goodies
 **** Theme
 #+BEGIN_SRC emacs-lisp
-  (load-theme 'monokai t)
+  (setq darkokai-mode-line-padding 1)
+  (load-theme 'darkokai t)
 #+END_SRC
 **** Smart Modeline
 #+BEGIN_SRC emacs-lisp
