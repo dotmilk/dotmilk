@@ -88,7 +88,7 @@
   (milk-add-subfolders-to-load-path milk-vendor-dir)
   (milk-add-subfolders-to-load-path milk-private-dir)
 #+END_SRC
-*** Sane Reset
+*** Sane`Reset
 **** Font
 #+BEGIN_SRC emacs-lisp
   (setq default-frame-alist
@@ -677,6 +677,68 @@
   (defvar endless/blog-dir (expand-file-name "~/milk/dotmilk.github.io/"))
 #+END_SRC
 *** Configure General Modes
+**** Milk Mode
+#+BEGIN_SRC emacs-lisp
+  (defgroup milk nil
+    "dotmilk."
+    :prefix "milk-"
+    :group 'applications)
+
+  (defvar milk-mode-keymap nil)
+  (defvar milk-mode-magit-keymap nil)
+
+  (defgroup milk-key nil
+    "Key prefix for milk related key commands."
+    :prefix "milk-key-"
+    :group 'milk)
+
+  (defgroup milk-key-magit nil
+    "Key prefix for magit related key commands under milk."
+    :prefix "milk-key-magit-"
+    :group 'milk)
+
+  (defcustom milk-key-command-prefix (kbd "C-c m")
+    "The prefix for milk related key commands."
+    :type 'string
+    :group 'milk)
+
+  (defcustom milk-key-magit-command-prefix (kbd (concat milk-key-command-prefix "m"))
+    "The prefix for magit related key commands under milk."
+    :type 'string
+    :group 'milk)
+
+  (define-prefix-command 'milk-mode-keymap)
+  (define-prefix-command 'milk-mode-magit-keymap)
+
+  (define-minor-mode milk-mode
+    "Minor Mode To Scratch My Curiosity Itch.
+
+  \\{milk-mode-map\}"
+    :lighter " .m"
+    :group 'milk
+    :keymap `((,milk-key-command-prefix . milk-mode-keymap)
+              (,milk-key-magit-command-prefix . milk-mode-magit-keymap)))
+
+  (let ((map milk-mode-keymap))
+    (define-key map (kbd "c") 'current-weather)
+    (define-key map (kbd "f") 'forecast-weather)
+    (define-key map (kbd "e") 'export-to-blog))
+
+  (let ((map milk-mode-magit-keymap))
+    (define-key map (kbd "s") 'magit-status)
+    (define-key map (kbd "l") 'magit-log-buffer-file)
+    (define-key map (kbd "b") 'milk-toggle-magit-blame))
+
+  (define-globalized-minor-mode milk-global-mode milk-mode milk-on)
+
+  (defun milk-on ()
+    (milk-mode +1))
+
+  (defun milk-off ()
+    (milk-mode -1))
+
+  (milk-global-mode)
+#+END_SRC
 **** Org-Mode
 #+BEGIN_SRC emacs-lisp
   (defun milk-org-mode-hook ()
@@ -1179,15 +1241,6 @@
 **** Expand Region
 #+BEGIN_SRC emacs-lisp
   (global-set-key (kbd "C-=") 'er/expand-region)
-#+END_SRC
-**** Mine ESC ESC SPC
-#+BEGIN_SRC emacs-lisp
-  (global-set-key (kbd "\e M-SPC c") 'current-weather)
-  (global-set-key (kbd "\e M-SPC f") 'forecast-weather)
-  (global-set-key (kbd "\e M-SPC m s") 'magit-status)
-  (global-set-key (kbd "\e M-SPC m l") 'magit-log-buffer-file)
-  (global-set-key (kbd "\e M-SPC m b") 'milk-toggle-magit-blame)
-  (global-set-key (kbd "\e M-SPC e") 'export-to-blog)
 #+END_SRC
 *** Define
 **** Ibuffer Occur
