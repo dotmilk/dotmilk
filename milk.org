@@ -216,7 +216,7 @@
 #+BEGIN_SRC emacs-lisp
   (require 'smart-mode-line)
   (setq sml/no-confirm-load-theme t
-        sml/theme 'smart-mode-line-respectful)
+        sml/theme 'respectful)
   (add-hook 'after-init-hook #'sml/setup)
 #+END_SRC
 **** Setup Powerline
@@ -231,11 +231,13 @@
 #+BEGIN_SRC emacs-lisp
   (require 'beacon)
   (beacon-mode +1)
+  (diminish 'beacon-mode)
 #+END_SRC
 **** Show Available Keybindings On Chord Start
 #+BEGIN_SRC emacs-lisp
   (require 'which-key)
   (which-key-mode +1)
+  (diminish 'which-key-mode)
 #+END_SRC
 **** Useful Frame Title
 #+BEGIN_SRC emacs-lisp
@@ -456,6 +458,7 @@
 **** Autorevert Buffers When Changed Externally
 #+BEGIN_SRC emacs-lisp
   (global-auto-revert-mode t)
+  (diminish 'auto-revert-mode)
 #+END_SRC
 **** Hippie Magic
 #+BEGIN_SRC emacs-lisp
@@ -487,6 +490,8 @@
   (define-key prog-mode-map (kbd "M-[") (milk-wrap-with "["))
   (define-key prog-mode-map (kbd "M-\"") (milk-wrap-with "\""))
   (setq blink-matching-paren nil)
+  (eval-after-load "smart-parens"
+    (diminish 'smartparens-mode " ⁽₎"))
 #+END_SRC
 **** Use Shit + Arrow Keys To Switch Visible Buffers
 #+BEGIN_SRC emacs-lisp
@@ -571,7 +576,6 @@
 #+END_SRC
 **** Get Dank Spellchecking Action
 #+BEGIN_SRC emacs-lisp
-                                          ;(require 'flyspell)
   (setq ispell-program-name "aspell" ; use aspell instead of ispell
         ispell-extra-args '("--sug-mode=ultra"))
 
@@ -580,13 +584,18 @@
       (flyspell-mode +1)))
 
   (add-hook 'text-mode-hook 'milk-enable-flyspell)
+  (eval-after-load "flyspell"
+    '(diminish 'flyspell-mode))
 #+END_SRC
 **** Clean Up Nasty Whitespace
 #+BEGIN_SRC emacs-lisp
   (defun milk-enable-whitespace ()
     (add-hook 'before-save-hook 'whitespace-cleanup)
     (whitespace-mode +1))
-
+  (eval-after-load "whitespace"
+    '(progn
+       (diminish 'whitespace-mode)
+       (diminish 'global-whitespace-mode)))
   (add-hook 'text-mode-hook 'milk-enable-whitespace)
 #+END_SRC
 **** Basic Narrowing
@@ -844,6 +853,7 @@
 **** Abbrev
 #+BEGIN_SRC emacs-lisp
   (add-hook 'text-mode-hook 'abbrev-mode)
+  (diminish 'abbrev-mode)
 #+END_SRC
 **** Eshell
 #+BEGIN_SRC emacs-lisp
@@ -876,6 +886,7 @@
 #+BEGIN_SRC emacs-lisp
   (milk-require-package 'flycheck)
   (with-eval-after-load 'flycheck
+    (diminish 'flycheck-mode " √")
     (setq-default flycheck-disabled-checkers '(emacs-lisp-checkdoc)))
 #+END_SRC
 **** { } Smartparen Return Opens Indented Line
@@ -911,6 +922,7 @@
 #+BEGIN_SRC emacs-lisp
   (milk-require-package 'company)
   (require 'company)
+  (diminish 'company-mode " C∀")
 #+END_SRC
 **** Company Configuration
 #+BEGIN_SRC emacs-lisp
@@ -1200,6 +1212,8 @@
                      (expand-file-name "company-distel" milk-vendor-dir))
                     (add-hook 'erlang-shell-mode-hook 'milk-erlang-shell-hook))
 #+END_SRC
+*** Yaml
+**** Holder
 ** Keys
 *** Globals
 **** Anzu
