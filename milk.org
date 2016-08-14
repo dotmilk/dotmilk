@@ -1191,8 +1191,7 @@
         (distel-setup)
         (require 'company-distel)
         (erl-ping erl-nodename-cache)
-        (add-to-list 'company-backends 'company-distel)
-        (milk-trace "Down with the OTP"))))
+        (add-to-list 'company-backends 'company-distel))))
 #+END_SRC
 **** Define Erlang Hook
 #+BEGIN_SRC emacs-lisp
