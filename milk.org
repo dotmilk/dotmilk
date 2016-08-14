@@ -26,13 +26,13 @@
 **** Add Subfolders To Load Path
 #+BEGIN_SRC emacs-lisp
   (defun milk-add-subfolders-to-load-path (parent-dir)
-   "Add all level PARENT-DIR subdirs to the `load-path'."
-   (dolist (f (directory-files parent-dir))
-     (let ((name (expand-file-name f parent-dir)))
-       (when (and (file-directory-p name)
-                  (not (string-prefix-p "." f)))
-         (add-to-list 'load-path name)
-         (milk-add-subfolders-to-load-path name)))))
+    "Add all level PARENT-DIR subdirs to the `load-path'."
+    (dolist (f (directory-files parent-dir))
+      (let ((name (expand-file-name f parent-dir)))
+        (when (and (file-directory-p name)
+                   (not (string-prefix-p "." f)))
+          (add-to-list 'load-path name)
+          (milk-add-subfolders-to-load-path name)))))
 #+END_SRC
 **** Add Subfolders To Custom Theme Path
 #+BEGIN_SRC emacs-lisp
@@ -88,7 +88,7 @@
   (milk-add-subfolders-to-load-path milk-vendor-dir)
   (milk-add-subfolders-to-load-path milk-private-dir)
 #+END_SRC
-*** Sane`Reset
+*** Sane Reset
 **** Font
 #+BEGIN_SRC emacs-lisp
   (setq default-frame-alist
@@ -243,8 +243,8 @@
 #+BEGIN_SRC emacs-lisp
   (setq frame-title-format
         '("" invocation-name " -> " (:eval (if (buffer-file-name)
-                                              (abbreviate-file-name (buffer-file-name))
-                                            "%b"))))
+                                               (abbreviate-file-name (buffer-file-name))
+                                             "%b"))))
 #+END_SRC
 **** Meaningful Buffer Names For Same Name
 #+BEGIN_SRC emacs-lisp
@@ -256,7 +256,7 @@
 #+END_SRC
 **** Highlight Current Line
 #+BEGIN_SRC emacs-lisp
-(global-hl-line-mode +1)
+  (global-hl-line-mode +1)
 #+END_SRC
 **** Volatile Highlights
 #+BEGIN_SRC emacs-lisp
@@ -427,12 +427,12 @@
         (indent-region beg end nil)))
 
   (advise-commands "indent" (yank yank-pop) after
-    (if (and (not (ad-get-arg 0))
-             (not (member major-mode milk-indent-sensitive-modes))
-             (or (derived-mode-p 'prog-mode)
-                 (member major-mode milk-yank-indent-modes)))
-        (let ((transient-mark-mode nil))
-          (yank-advised-indent-function (region-beginning) (region-end)))))
+                   (if (and (not (ad-get-arg 0))
+                            (not (member major-mode milk-indent-sensitive-modes))
+                            (or (derived-mode-p 'prog-mode)
+                                (member major-mode milk-yank-indent-modes)))
+                       (let ((transient-mark-mode nil))
+                         (yank-advised-indent-function (region-beginning) (region-end)))))
 #+END_SRC
 **** Newline At EOF
 #+BEGIN_SRC emacs-lisp
@@ -440,7 +440,7 @@
 #+END_SRC
 **** Delete Selected With Keypress
 #+BEGIN_SRC emacs-lisp
-(delete-selection-mode t)
+  (delete-selection-mode t)
 #+END_SRC
 **** Store Backups And Autosaves In TMP Dir
 #+BEGIN_SRC emacs-lisp
@@ -760,6 +760,7 @@
                           ))
     (org-bullets-mode 1))
 
+  ;;(set (make-local-variable 'whitespace-style) nil))))
   (with-eval-after-load "org"
     (require 'org-bullets)
     (require 'ox-md nil t)
@@ -1136,7 +1137,6 @@
   (milk-add-to-auto-mode "\\.ex\\'" 'elixir-mode)
   (milk-add-to-auto-mode "\\.exs\\'" 'elixir-mode)
   (milk-add-to-auto-mode "\\.elixir\\'" 'elixir-mode)
-
 #+END_SRC
 **** Auto Close Do
 #+BEGIN_SRC emacs-lisp
@@ -1213,7 +1213,14 @@
                     (add-hook 'erlang-shell-mode-hook 'milk-erlang-shell-hook))
 #+END_SRC
 *** Yaml
-**** Holder
+**** Require Yaml
+#+BEGIN_SRC emacs-lisp
+  (milk-require-packages '(yaml-mode))
+#+END_SRC
+**** Subword Mode
+#+BEGIN_SRC emacs-lisp
+  (add-hook 'yaml-mode-hook 'subword-mode)
+#+END_SRC
 ** Keys
 *** Globals
 **** Anzu
@@ -1273,10 +1280,10 @@
 #+END_SRC
 **** Ielm
 #+BEGIN_SRC emacs-lisp
-  ;; (eval-after-load "ielm"
-  ;;   '(progn
-  ;;      (define-key ielm-map (kbd "M-(") (prelude-wrap-with "("))
-  ;;      (define-key ielm-map (kbd "M-\"") (prelude-wrap-with "\""))))
+;; (eval-after-load "ielm"
+;;   '(progn
+;;      (define-key ielm-map (kbd "M-(") (prelude-wrap-with "("))
+;;      (define-key ielm-map (kbd "M-\"") (prelude-wrap-with "\""))))
 #+END_SRC
 **** Slime
 #+BEGIN_SRC emacs-lisp
