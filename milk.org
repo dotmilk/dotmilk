@@ -905,7 +905,7 @@
                milk-flyspell)
       (flyspell-prog-mode))
     (smartparens-mode +1)
-    (global-aggressive-indent-mode 1)
+    (aggressive-indent-mode +1)
     (flycheck-mode)
     (milk-enable-whitespace)
     (font-lock-add-keywords
