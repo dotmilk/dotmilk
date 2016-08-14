@@ -1220,6 +1220,19 @@
 #+BEGIN_SRC emacs-lisp
   (add-hook 'yaml-mode-hook 'subword-mode)
 #+END_SRC
+*** Css
+**** Css Coding Defaults
+#+BEGIN_SRC emacs-lisp
+  (eval-after-load 'css-mode
+    '(progn
+       ;; TODO future sight of 'depends on'
+       ;; TODO normalize hooks and evals
+       (setq css-indent-offset 2)
+       (defun milk-css-mode-hook ()
+         (run-hooks 'milk-prog-mode-defaults)
+         (rainbow-mode +1))
+       (add-hook 'css-mode-hook 'milk-css-mode-hook)))
+#+END_SRC
 ** Keys
 *** Globals
 **** Anzu
