@@ -692,6 +692,8 @@
 
   (defvar milk-mode-keymap nil)
   (defvar milk-mode-magit-keymap nil)
+  (defvar milk-mode-info-keymap nil)
+  (defvar milk-mode-files-keymap nil)
 
   (defgroup milk-key nil
     "Key prefix for milk related key commands."
@@ -703,6 +705,17 @@
     :prefix "milk-key-magit-"
     :group 'milk)
 
+  (defgroup milk-key-info nil
+    "Key prefix for information related key commands under milk."
+    :prefix "milk-key-info-"
+    :group 'milk)
+
+  (defgroup milk-key-files nil
+    "Key prefix for file related key commands under milk"
+    :prefix "milk-key-files-"
+    :group 'milk)
+
+
   (defcustom milk-key-command-prefix (kbd "C-c m")
     "The prefix for milk related key commands."
     :type 'string
@@ -713,8 +726,20 @@
     :type 'string
     :group 'milk)
 
+  (defcustom milk-key-info-command-prefix (kbd (concat milk-key-command-prefix "i"))
+    "The prefix for information related key commands under milk."
+    :type 'string
+    :group 'milk)
+
+  (defcustom milk-key-files-command-prefix (kbd (concat milk-key-command-prefix "f"))
+    "The prefix for file related key commands under milk."
+    :type 'string
+    :group 'milk)
+
   (define-prefix-command 'milk-mode-keymap)
   (define-prefix-command 'milk-mode-magit-keymap)
+  (define-prefix-command 'milk-mode-info-keymap)
+  (define-prefix-command 'milk-mode-files-keymap)
 
   (define-minor-mode milk-mode
     "Minor Mode To Scratch My Curiosity Itch.
@@ -723,17 +748,24 @@
     :lighter " .m"
     :group 'milk
     :keymap `((,milk-key-command-prefix . milk-mode-keymap)
-              (,milk-key-magit-command-prefix . milk-mode-magit-keymap)))
+              (,milk-key-magit-command-prefix . milk-mode-magit-keymap)
+              (,milk-key-info-command-prefix . milk-mode-info-keymap)
+              (,milk-key-files-command-prefix . milk-mode-files-keymap)))
 
-  (let ((map milk-mode-keymap))
-    (define-key map (kbd "c") 'current-weather)
-    (define-key map (kbd "f") 'forecast-weather)
-    (define-key map (kbd "e") 'export-to-blog))
+  (let ((map milk-mode-keymap)))
 
   (let ((map milk-mode-magit-keymap))
     (define-key map (kbd "s") 'magit-status)
     (define-key map (kbd "l") 'magit-log-buffer-file)
     (define-key map (kbd "b") 'milk-toggle-magit-blame))
+
+  (let ((map milk-mode-info-keymap ))
+    (define-key map (kbd "c") 'current-weather)
+    (define-key map (kbd "f") 'forecast-weather)
+    (define-key map (kbd "e") 'export-to-blog))
+
+  (let ((map milk-mode-files-keymap))
+    (define-key map (kbd "r") 'recentf-open-files))
 
   (define-globalized-minor-mode milk-global-mode milk-mode milk-on)
 
