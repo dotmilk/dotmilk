@@ -389,6 +389,17 @@
   (defun milk-add-to-auto-mode (extension mode)
     (add-to-list 'auto-mode-alist (cons extension mode) ))
 #+END_SRC
+**** Ido Recent File Find
+#+BEGIN_SRC emacs-lisp
+  (defun recentf-ido-find-file ()
+    "Find a recent file using Ido."
+    (interactive)
+    (let* ((ido-max-prospects 5)
+           (minibuffer-completion-table recentf-list)
+           (file (ido-completing-read "Choose recent file: " recentf-list nil t)))
+      (when file
+        (find-file file))))
+#+END_SRC
 **** When Files Exist
 #+BEGIN_SRC emacs-lisp
   (defmacro when-files-exist (list-of-files &rest body)
@@ -765,7 +776,7 @@
     (define-key map (kbd "e") 'export-to-blog))
 
   (let ((map milk-mode-files-keymap))
-    (define-key map (kbd "r") 'recentf-open-files))
+    (define-key map (kbd "r") 'recentf-ido-find-file))
 
   (define-globalized-minor-mode milk-global-mode milk-mode milk-on)
 
