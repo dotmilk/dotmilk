@@ -50,11 +50,6 @@
 #+BEGIN_SRC emacs-lisp
   (defvar milk-dir user-emacs-directory)
 #+END_SRC
-**** Installed Packages Dir
-#+BEGIN_SRC emacs-lisp
-  (defvar milk-package-dir (expand-file-name "elpa" milk-dir))
-  (milk-idem-make-dir milk-package-dir)
-#+END_SRC
 **** Private Dir
 #+BEGIN_SRC emacs-lisp
   (defvar milk-private-dir (expand-file-name "private" milk-dir))
@@ -136,75 +131,13 @@
 #+BEGIN_SRC emacs-lisp
   (fset 'yes-or-no-p 'y-or-n-p)
 #+END_SRC
-*** Package Magic
-**** Setup Packages
+*** Pallet Magic
+**** Pallet
 #+BEGIN_SRC emacs-lisp
-  (require 'cl)
-  (require 'package)
-  (setq package-user-dir milk-package-dir)
-  (add-to-list 'package-archives
-               '("melpa" . "https://melpa.org/packages/") t)
-  (package-initialize)
-#+END_SRC
-**** Muh Required Packages
-#+BEGIN_SRC emacs-lisp
-  (defvar milk-packages
-    '(aggressive-indent
-      anzu
-      beacon
-      browse-kill-ring
-      crux
-      diff-hl
-      diminish
-      expand-region
-      esup
-      gitattributes-mode
-      gitconfig-mode
-      gitignore-mode
-      magit
-      projectile
-      smart-mode-line
-      smartparens
-      volatile-highlights
-      which-key
-      zop-to-char))
-#+END_SRC
-**** Packages Installed Predicate
-#+BEGIN_SRC emacs-lisp
-  (defun milk-packages-installed-p ()
-    (every #'package-installed-p milk-packages))
-#+END_SRC
-**** Function To Require A Package
-#+BEGIN_SRC emacs-lisp
-  (defun milk-require-package (package)
-    (unless (memq package milk-packages)
-      (add-to-list 'milk-packages package))
-    (unless (package-installed-p package)
-      (package-install package)))
-#+END_SRC
-**** Function To Ensure Packages Are Installed
-#+BEGIN_SRC emacs-lisp
-  (defun milk-require-packages (packages)
-    (mapc #'milk-require-package packages))
-#+END_SRC
-**** Function To Install Muh Required Packages
-#+BEGIN_SRC emacs-lisp
-  (defun milk-install-packages ()
-    (unless (milk-packages-installed-p)
-      (message "%s" "Please hold while package db refreshes...")
-      (package-refresh-contents)
-      (message "%s" " done.")
-      (milk-require-packages milk-packages)))
-
-#+END_SRC
-**** Add Some Personal Favorite Packages
-#+BEGIN_SRC emacs-lisp
-  (milk-require-packages '(darkokai-theme
-                           org-bullets))
-#+END_SRC
-**** Finally Install Those Packages
-#+BEGIN_SRC emacs-lisp
-  (milk-install-packages)
+  (require 'cask)
+  (cask-initialize)
+  (require 'pallet)
+  (pallet-mode t)
 #+END_SRC
 *** Visual Goodies
 **** Theme
@@ -409,10 +342,6 @@
       `(when (and ,@predicates) ,@body)))
 #+END_SRC
 *** Sane Editing
-**** Require Undo-tree
-#+BEGIN_SRC emacs-lisp
-  (milk-require-package 'undo-tree)
-#+END_SRC
 **** Fucking Tabs And Indents
 #+BEGIN_SRC emacs-lisp
   (defvar milk-yank-indent-threshold 1000)
@@ -907,7 +836,6 @@
 #+END_SRC
 **** Ido
 #+BEGIN_SRC emacs-lisp
-  (milk-require-packages '(flx-ido ido-ubiquitous smex))
   (with-eval-after-load "ido"
     (setq ido-enable-prefix nil
           ido-enable-flex-matching t
@@ -928,7 +856,6 @@
 *** Generic Programming
 **** Require Flycheck
 #+BEGIN_SRC emacs-lisp
-  (milk-require-package 'flycheck)
   (with-eval-after-load 'flycheck
     (diminish 'flycheck-mode " √")
     (setq-default flycheck-disabled-checkers '(emacs-lisp-checkdoc)))
@@ -964,7 +891,6 @@
 *** Company
 **** Require Company
 #+BEGIN_SRC emacs-lisp
-  (milk-require-package 'company)
   (require 'company)
   (diminish 'company-mode " C∀")
 #+END_SRC
@@ -980,10 +906,6 @@
   (global-company-mode 1)
 #+END_SRC
 *** Lisp
-**** Require Rainbow Parens
-#+BEGIN_SRC emacs-lisp
-  (milk-require-package 'rainbow-delimiters)
-#+END_SRC
 **** Define Generic Lisp Hook
 #+BEGIN_SRC emacs-lisp
   (defun milk-lisp-coding-defaults ()
@@ -1000,10 +922,6 @@
   (setq milk-interactive-lisp-coding-hook 'milk-interactive-lisp-coding-defaults)
 #+END_SRC
 *** Elisp
-**** Require Elisp Stuff
-#+BEGIN_SRC emacs-lisp
-  (milk-require-packages '(elisp-slime-nav rainbow-mode))
-#+END_SRC
 **** Define Smartparens In Minibuffer
 #+BEGIN_SRC emacs-lisp
   (defun conditionally-enable-smartparens-mode ()
@@ -1088,10 +1006,6 @@
     (add-hook hook 'elisp-slime-nav-mode))
 #+END_SRC
 *** Common Lisp
-**** Require Common Lisp Stuff
-#+BEGIN_SRC emacs-lisp
-  (milk-require-package 'slime)
-#+END_SRC
 **** Auto-Mode for Sbclrc and .Cl
 #+BEGIN_SRC emacs-lisp
   (add-to-list 'auto-mode-alist '("\\.sbclrc\\'" . lisp-mode))
@@ -1137,10 +1051,6 @@
   (setq inferior-lisp-program "/usr/local/bin/sbcl")
 #+END_SRC
 *** Web
-**** Require Web-Mode
-#+BEGIN_SRC emacs-lisp
-  (milk-require-package 'web-mode)
-#+END_SRC
 **** Auto-Mode Various Web Related Files
 #+BEGIN_SRC emacs-lisp
   (add-to-list 'auto-mode-alist '("\\.phtml\\'" . web-mode))
@@ -1170,11 +1080,6 @@
     (sp-local-tag "#" "<%# " " %>"))
 #+END_SRC
 *** Elixir
-**** Require Elixir Mode And Alchemist
-#+BEGIN_SRC emacs-lisp
-  (milk-require-packages '(elixir-mode
-                           alchemist))
-#+END_SRC
 **** Auto-Mode Elixir Files
 #+BEGIN_SRC emacs-lisp
   (milk-add-to-auto-mode "\\.ex\\'" 'elixir-mode)
@@ -1207,10 +1112,6 @@
   (add-hook 'elixir-mode-hook 'milk-elixir-coding-defaults)
 #+END_SRC
 *** Erlang
-**** Require Erlang
-#+BEGIN_SRC emacs-lisp
-  (milk-require-package 'erlang)
-#+END_SRC
 **** Auto-Mode Erlang Files
 #+BEGIN_SRC emacs-lisp
   (add-to-list 'auto-mode-alist '("\\.erl\\'" . erlang-mode))
@@ -1255,10 +1156,6 @@
                     (add-hook 'erlang-shell-mode-hook 'milk-erlang-shell-hook))
 #+END_SRC
 *** Yaml
-**** Require Yaml
-#+BEGIN_SRC emacs-lisp
-  (milk-require-packages '(yaml-mode))
-#+END_SRC
 **** Subword Mode
 #+BEGIN_SRC emacs-lisp
   (add-hook 'yaml-mode-hook 'subword-mode)
