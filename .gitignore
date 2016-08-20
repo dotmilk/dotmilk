@@ -3,6 +3,8 @@ elpa
 private
 savefile
 vendor
+games
+.cask
 
 #ignore interlock
 .#*
