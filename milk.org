@@ -231,17 +231,6 @@
           (funcall function))
       (switch-to-buffer-other-window buffer-name)))
 #+END_SRC
-**** Ansiweather
-#+BEGIN_SRC emacs-lisp
-  (defun current-weather ()
-    "Display current weather."
-    (interactive)
-    (shell-command "ansiweather"))
-  (defun forecast-weather ()
-    "Show five day forecast."
-    (interactive)
-    (shell-command "ansiweather -F"))
-#+END_SRC
 **** Toggle Magit-Blame
 #+BEGIN_SRC emacs-lisp
   (defun milk-toggle-magit-blame ()
@@ -700,8 +689,8 @@
     (define-key map (kbd "b") 'milk-toggle-magit-blame))
 
   (let ((map milk-mode-info-keymap ))
-    (define-key map (kbd "c") 'current-weather)
-    (define-key map (kbd "f") 'forecast-weather)
+    (define-key map (kbd "c") 'sw/current)
+    (define-key map (kbd "f") 'sw/forecast)
     (define-key map (kbd "e") 'export-to-blog))
 
   (let ((map milk-mode-files-keymap))
@@ -720,6 +709,7 @@
 **** Org-Mode
 #+BEGIN_SRC emacs-lisp
   (defun milk-org-mode-hook ()
+    (whitespace-turn-off)
     (dolist (face '(org-level-1
                     org-level-2
                     org-level-3
@@ -744,7 +734,7 @@
                  '("se"
                    "#+BEGIN_SRC emacs-lisp\n?\n#+END_SRC"
                    "<src lang=\"emacs-lisp\">\n?\n</src>"))
-    (setq org-n-level-faces 3)
+    (setq org-n-level-faces 5)
     (setq org-hide-leading-stars t)
     (setq org-bullets-bullet-list
           '("☯" "☰" "☱" "☲" "☳" "☴" "☵" "☶" "☷"))

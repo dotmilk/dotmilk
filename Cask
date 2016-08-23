@@ -1,6 +1,7 @@
 (source "gnu" "http://elpa.gnu.org/packages/")
 (source melpa)
 
+(depends-on "simple-weather" :git "https://github.com/dotmilk/simple-weather")
 (depends-on "aggressive-indent")
 (depends-on "alchemist")
 (depends-on "anzu")
