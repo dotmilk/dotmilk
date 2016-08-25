@@ -136,6 +136,7 @@
 #+BEGIN_SRC emacs-lisp
   (require 'cask)
   (cask-initialize)
+  (add-hook 'after-init-hook 'exec-path-from-shell-initialize)
   (require 'pallet)
   (pallet-mode t)
 #+END_SRC
@@ -886,9 +887,9 @@
 #+END_SRC
 **** Company Configuration
 #+BEGIN_SRC emacs-lisp
-  (setq company-idle-delay 0.5)
+  (setq company-idle-delay 1.5)
   (setq company-tooltip-limit 10)
-  (setq company-minimum-prefix-length 2)
+  (setq company-minimum-prefix-length 3)
   (setq company-tooltip-flip-when-above t)
 #+END_SRC
 **** Turn Company On
@@ -1092,7 +1093,8 @@
 #+END_SRC
 **** Define Elixir Mode Hook
 #+BEGIN_SRC emacs-lisp
-  (defun milk-elixir-coding-defaults ())
+  (defun milk-elixir-coding-defaults ()
+    (alchemist-mode +1))
 
   (with-eval-after-load "elixir-mode"
     (add-to-list 'aggressive-indent-excluded-modes 'elixir-mode))

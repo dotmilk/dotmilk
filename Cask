@@ -17,6 +17,7 @@
 (depends-on "elixir-mode")
 (depends-on "epl")
 (depends-on "erlang")
+(depends-on "exec-path-from-shell")
 (depends-on "expand-region")
 (depends-on "flx-ido")
 (depends-on "flycheck")
