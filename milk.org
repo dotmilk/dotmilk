@@ -887,7 +887,7 @@
 #+END_SRC
 **** Company Configuration
 #+BEGIN_SRC emacs-lisp
-  (setq company-idle-delay 1.5)
+  (setq company-idle-delay nil)
   (setq company-tooltip-limit 10)
   (setq company-minimum-prefix-length 3)
   (setq company-tooltip-flip-when-above t)
@@ -1207,6 +1207,10 @@
 **** Expand Region
 #+BEGIN_SRC emacs-lisp
   (global-set-key (kbd "C-=") 'er/expand-region)
+#+END_SRC
+**** Company Complete
+#+BEGIN_SRC emacs-lisp
+  (global-set-key [C-tab] 'company-complete-common-or-cycle)
 #+END_SRC
 *** Define
 **** Ibuffer Occur
