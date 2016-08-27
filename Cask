@@ -1,7 +1,6 @@
-(source "gnu" "http://elpa.gnu.org/packages/")
+(source gnu)
 (source melpa)
 
-(depends-on "simple-weather" :git "https://github.com/dotmilk/simple-weather")
 (depends-on "aggressive-indent")
 (depends-on "alchemist")
 (depends-on "anzu")
@@ -35,6 +34,7 @@
 (depends-on "rainbow-delimiters")
 (depends-on "rainbow-mode")
 (depends-on "seq")
+(depends-on "simple-weather" :git "https://github.com/dotmilk/simple-weather")
 (depends-on "slime")
 (depends-on "smart-mode-line")
 (depends-on "smart-mode-line-powerline-theme")
