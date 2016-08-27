@@ -881,7 +881,6 @@
                milk-flyspell)
       (flyspell-prog-mode))
     (smartparens-mode +1)
-    (aggressive-indent-mode +1)
     (flycheck-mode)
     (milk-enable-whitespace)
     (font-lock-add-keywords
@@ -916,7 +915,8 @@
 #+BEGIN_SRC emacs-lisp
   (defun milk-lisp-coding-defaults ()
     (smartparens-strict-mode +1)
-    (rainbow-delimiters-mode +1))
+    (rainbow-delimiters-mode +1)
+    (aggressive-indent-mode +1))
   (setq milk-lisp-coding-hook 'milk-lisp-coding-defaults)
 #+END_SRC
 **** Define Generic Interactive Lisp Hook
@@ -1115,7 +1115,6 @@
     (diminish 'alchemist-mode " ☿"))
 
   (with-eval-after-load "elixir-mode"
-    (aggressive-indent-mode -1)
     (add-to-list 'aggressive-indent-excluded-modes 'elixir-mode))
 #+END_SRC
 **** Set Elixir Mode Hook
