@@ -739,6 +739,8 @@
     (setq org-hide-leading-stars t)
     (setq org-bullets-bullet-list
           '("☯" "☰" "☱" "☲" "☳" "☴" "☵" "☶" "☷"))
+ ;;   (add-to-list org-src-lang-modes '("bash" . shell-script))
+ ;;   (add-to-list org-src-lang-modes '("sh" . shell-script))
     (defadvice org-mode-flyspell-verify (after org-mode-flyspell-verify-hack activate)
       (let ((rlt ad-return-value)
             (begin-regexp "^[ \t]*#\\+begin_\\(src\\|html\\|latex\\)")
@@ -857,6 +859,11 @@
     (setq smex-save-file (expand-file-name ".smex-items" milk-savefile-dir))
     (smex-initialize))
   (add-hook 'after-init-hook '(lambda () (ido-mode +1)))
+#+END_SRC
+*** Rvm
+#+BEGIN_SRC emacs-lisp
+  (require 'rvm)
+  (rvm-use-default)
 #+END_SRC
 ** Programming
 *** Generic Programming
@@ -1171,17 +1178,35 @@
   (add-hook 'yaml-mode-hook 'subword-mode)
 #+END_SRC
 *** Css
+**** Css Mode Hook
+#+BEGIN_SRC emacs-lisp
+  (defun milk-css-mode-hook ()
+    (run-hooks 'milk-prog-mode-defaults)
+    (rainbow-mode +1))
+#+END_SRC
 **** Css Coding Defaults
 #+BEGIN_SRC emacs-lisp
   (eval-after-load 'css-mode
     '(progn
-       ;; TODO future sight of 'depends on'
-       ;; TODO normalize hooks and evals
        (setq css-indent-offset 2)
-       (defun milk-css-mode-hook ()
-         (run-hooks 'milk-prog-mode-defaults)
-         (rainbow-mode +1))
        (add-hook 'css-mode-hook 'milk-css-mode-hook)))
+#+END_SRC
+*** Scss
+**** Auto-Mode Scss
+#+BEGIN_SRC emacs-lisp
+  (add-to-list 'auto-mode-alist '("\\.scss\\'" . scss-mode))
+#+END_SRC
+**** Set Scss Hook
+#+BEGIN_SRC emacs-lisp
+  (defun milk-scss-mode-defaults ()
+    (milk-css-mode-hook))
+  (setq milk-scss-mode-hook 'milk-scss-mode-defaults)
+  (add-hook 'scss-mode-hook (lambda () (run-hooks 'milk-scss-mode-hook)))
+#+END_SRC
+*** Sass
+**** Auto-Mode Sass
+#+BEGIN_SRC emacs-lisp
+  (add-to-list 'auto-mode-alist '("\\.sass\\'" . sass-mode))
 #+END_SRC
 ** Keys
 *** Global
