@@ -1251,6 +1251,14 @@
 #+BEGIN_SRC emacs-lisp
   (global-set-key [C-tab] 'company-complete-common-or-cycle)
 #+END_SRC
+**** Neotree
+#+BEGIN_SRC emacs-lisp
+  (global-set-key (kbd "C-\\") 'neotree-toggle)
+#+END_SRC
+**** SrSpeedbar
+#+BEGIN_SRC emacs-lisp
+  (global-set-key (kbd "C-M-\\") #'sr-speedbar-toggle)
+#+END_SRC
 *** Define
 **** Ibuffer Occur
 #+BEGIN_SRC emacs-lisp

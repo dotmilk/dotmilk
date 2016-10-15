@@ -45,6 +45,7 @@
 (depends-on "smart-mode-line-powerline-theme")
 (depends-on "smartparens")
 (depends-on "smex")
+(depends-on "sr-speedbar")
 (depends-on "undo-tree")
 (depends-on "volatile-highlights")
 (depends-on "web-mode")
