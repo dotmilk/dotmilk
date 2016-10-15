@@ -874,7 +874,12 @@
 *** SrSpeedbar
 #+BEGIN_SRC emacs-lisp
   (setq speedbar-use-images nil)
-  (eval-after-load "speedbar" '(speedbar-add-supported-extension ".lisp"))
+  (eval-after-load "speedbar" (lambda ()
+                                (speedbar-add-supported-extension ".lisp")
+                                (define-key speedbar-mode-map [(tab)] 'speedbar-toggle-line-expansion)))
+  (add-hook 'speedbar-mode-hook
+            (lambda ()
+              (speedbar-change-initial-expansion-list "quick buffers")))
 #+End_SRC
 ** Programming
 *** Generic Programming
