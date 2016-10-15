@@ -1,0 +1,7 @@
+* Blogs                                                              :elfeed:
+** [[https://dotmilk.github.io/atom.xml][.milk]]                                                               :mine:
+** [[http://feed.dilbert.com/dilbert/blog?format=xml][dilbert]]                                                              :nlp:
+** Development                                                          :dev:
+*** Lisp                                                               :lisp:
+**** [[http://planet.lisp.org/rss20.xml][Meta-Lisp]]
+*** [[http://langnostic.inaimathi.ca/feed][language agnostic]]                                               :grabbag:

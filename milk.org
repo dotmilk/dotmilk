@@ -867,6 +867,15 @@
   (require 'rvm)
   (rvm-use-default)
 #+END_SRC
+*** Elfeed
+#+BEGIN_SRC emacs-lisp
+  (elfeed-org)
+#+END_SRC
+*** SrSpeedbar
+#+BEGIN_SRC emacs-lisp
+  (setq speedbar-use-images nil)
+  (eval-after-load "speedbar" '(speedbar-add-supported-extension ".lisp"))
+#+End_SRC
 ** Programming
 *** Generic Programming
 **** Require Flycheck
@@ -1173,6 +1182,47 @@
   (when-files-exist ((expand-file-name "distel" milk-vendor-dir)
                      (expand-file-name "company-distel" milk-vendor-dir))
                     (add-hook 'erlang-shell-mode-hook 'milk-erlang-shell-hook))
+#+END_SRC
+*** Ruby
+**** Auto-Mode Ruby Files
+#+BEGIN_SRC emacs-lisp
+  (add-to-list 'auto-mode-alist '("\\.rake\\'" . ruby-mode))
+  (add-to-list 'auto-mode-alist '("Rakefile\\'" . ruby-mode))
+  (add-to-list 'auto-mode-alist '("\\.gemspec\\'" . ruby-mode))
+  (add-to-list 'auto-mode-alist '("\\.ru\\'" . ruby-mode))
+  (add-to-list 'auto-mode-alist '("Gemfile\\'" . ruby-mode))
+  (add-to-list 'auto-mode-alist '("Guardfile\\'" . ruby-mode))
+  (add-to-list 'auto-mode-alist '("Capfile\\'" . ruby-mode))
+  (add-to-list 'auto-mode-alist '("\\.cap\\'" . ruby-mode))
+  (add-to-list 'auto-mode-alist '("\\.thor\\'" . ruby-mode))
+  (add-to-list 'auto-mode-alist '("\\.rabl\\'" . ruby-mode))
+  (add-to-list 'auto-mode-alist '("Thorfile\\'" . ruby-mode))
+  (add-to-list 'auto-mode-alist '("Vagrantfile\\'" . ruby-mode))
+  (add-to-list 'auto-mode-alist '("\\.jbuilder\\'" . ruby-mode))
+  (add-to-list 'auto-mode-alist '("Podfile\\'" . ruby-mode))
+  (add-to-list 'auto-mode-alist '("\\.podspec\\'" . ruby-mode))
+  (add-to-list 'auto-mode-alist '("Puppetfile\\'" . ruby-mode))
+  (add-to-list 'auto-mode-alist '("Berksfile\\'" . ruby-mode))
+  (add-to-list 'auto-mode-alist '("Appraisals\\'" . ruby-mode))
+#+END_SRC
+**** Ignore Rubinius
+#+BEGIN_SRC emacs-lisp
+  (add-to-list 'completion-ignored-extensions ".rbc")
+#+END_SRC
+**** Eval After Load
+#+BEGIN_SRC emacs-lisp
+  (eval-after-load 'ruby-mode
+    '(progn
+       (defun prelude-ruby-mode-defaults ()
+         (inf-ruby-minor-mode +1)
+         (ruby-tools-mode +1)
+         ;; CamelCase aware editing operations
+         (subword-mode +1))
+
+       (setq prelude-ruby-mode-hook 'prelude-ruby-mode-defaults)
+
+       (add-hook 'ruby-mode-hook (lambda ()
+                                   (run-hooks 'prelude-ruby-mode-hook)))))
 #+END_SRC
 *** Yaml
 **** Subword Mode
