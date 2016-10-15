@@ -730,6 +730,8 @@
     (require 'ox-gfm nil t)
     (setq org-jekyll-use-src-plugin t)
     (setq org-use-property-inheritance t)
+    (setq org-closed-keep-when-no-todo t)
+    (setq org-log-done 'time)
     (setq org-src-ask-before-returning-to-edit-buffer nil)
     (add-to-list 'org-structure-template-alist
                  '("se"
@@ -739,8 +741,8 @@
     (setq org-hide-leading-stars t)
     (setq org-bullets-bullet-list
           '("☯" "☰" "☱" "☲" "☳" "☴" "☵" "☶" "☷"))
- ;;   (add-to-list org-src-lang-modes '("bash" . shell-script))
- ;;   (add-to-list org-src-lang-modes '("sh" . shell-script))
+    ;;   (add-to-list org-src-lang-modes '("bash" . shell-script))
+    ;;   (add-to-list org-src-lang-modes '("sh" . shell-script))
     (defadvice org-mode-flyspell-verify (after org-mode-flyspell-verify-hack activate)
       (let ((rlt ad-return-value)
             (begin-regexp "^[ \t]*#\\+begin_\\(src\\|html\\|latex\\)")
