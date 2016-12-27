@@ -1288,6 +1288,24 @@
 #+BEGIN_SRC emacs-lisp
   (add-to-list 'auto-mode-alist '("\\.sass\\'" . sass-mode))
 #+END_SRC
+*** Dylan
+**** Auto-Mode Dylan
+#+BEGIN_SRC emacs-lisp
+  (add-to-list 'auto-mode-alist '("\\.dylan\\'" . dylan-mode))
+#+END_SRC
+**** Dylan After Load
+#+BEGIN_SRC emacs-lisp
+  (with-eval-after-load 'dylan-mode
+    (setq inferior-dylan-program "/usr/local/bin/dswank")
+    (dime-setup '(dime-dylan dime-repl))
+    (setenv "OPEN_DYLAN_USER_REGISTRIES" "/Users/sethprice/forge/registry"))
+#+END_SRC
+*** Javascript
+**** Auto-Mode JS Files
+#+BEGIN_SRC emacs-lisp
+  ;; (Add-to-list 'auto-mode-alist '("\\.js\\'" . js2-mode))
+#+END_SRC
+
 ** Keys
 *** Global
 **** Anzu
