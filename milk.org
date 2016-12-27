@@ -1058,6 +1058,10 @@
 #+BEGIN_SRC emacs-lisp
   (setq slime-contribs '(slime-fancy))
 #+END_SRC
+**** Slime Repl History
+#+BEGIN_SRC emacs-lisp
+  (setf slime-repl-history-size 2000)
+#+END_SRC
 **** Set Common Lisp Hook
 #+BEGIN_SRC emacs-lisp
   (add-hook 'lisp-mode-hook (lambda () (run-hooks 'milk-lisp-coding-hook)))
