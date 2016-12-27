@@ -1188,6 +1188,25 @@
                      (expand-file-name "company-distel" milk-vendor-dir))
                     (add-hook 'erlang-shell-mode-hook 'milk-erlang-shell-hook))
 #+END_SRC
+*** Elm
+**** Auto-Mode Elm Files
+#+BEGIN_SRC emacs-lisp
+  (milk-add-to-auto-mode "\\.elm\\'" 'elm-mode)
+#+END_SRC
+**** Define Elm Mode Hook
+#+BEGIN_SRC emacs-lisp
+  (defun milk-elm-coding-defaults ())
+
+  (with-eval-after-load "elm-mode"
+    (add-hook 'elm-mode-hook 'company-mode)
+    (add-to-list 'company-backends 'company-elm)
+    (diminish 'elm-mode " elm")
+    (add-to-list 'aggressive-indent-excluded-modes 'elm-mode))
+#+END_SRC
+**** Set Elm Mode Hook
+#+BEGIN_SRC emacs-lisp
+  (add-hook 'elm-mode-hook 'milk-elm-coding-defaults)
+#+END_SRC
 *** Ruby
 **** Auto-Mode Ruby Files
 #+BEGIN_SRC emacs-lisp
