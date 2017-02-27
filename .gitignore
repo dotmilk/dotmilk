@@ -41,5 +41,7 @@ nbproject
 *.sublime-workspace
 .idea
 
+milk.org[*Org Src milk.org[ emacs-lisp ]*]
+
 # Folders to ignore
 node_modules
