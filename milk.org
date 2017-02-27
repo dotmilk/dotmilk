@@ -887,7 +887,9 @@
 #+BEGIN_SRC emacs-lisp
   (with-eval-after-load 'flycheck
     (diminish 'flycheck-mode " √")
-    (setq-default flycheck-disabled-checkers '(emacs-lisp-checkdoc)))
+    (setq-default flycheck-disabled-checkers '(emacs-lisp-checkdoc
+                                               javascript-jshint))
+    (flycheck-add-mode 'javascript-eslint 'javascript-mode))
 #+END_SRC
 **** { } Smartparen Return Opens Indented Line
 #+BEGIN_SRC emacs-lisp
