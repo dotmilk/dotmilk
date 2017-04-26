@@ -331,6 +331,13 @@
                                list-of-files)))
       `(when (and ,@predicates) ,@body)))
 #+END_SRC
+**** Kill Other Buffers
+#+BEGIN_SRC emacs-lisp
+  (defun kill-other-buffers ()
+    "Kill all other buffers."
+    (interactive)
+    (mapc 'kill-buffer (delq (current-buffer) (buffer-list))))
+#+END_SRC
 *** Sane Editing
 **** Fucking Tabs And Indents
 #+BEGIN_SRC emacs-lisp
@@ -695,7 +702,8 @@
     (define-key map (kbd "e") 'export-to-blog))
 
   (let ((map milk-mode-files-keymap))
-    (define-key map (kbd "r") 'recentf-ido-find-file))
+    (define-key map (kbd "r") 'recentf-ido-find-file)
+    (define-key map (kbd "o") 'kill-other-buffers))
 
   (define-globalized-minor-mode milk-global-mode milk-mode milk-on)
 
@@ -1306,6 +1314,21 @@
 **** Auto-Mode JS Files
 #+BEGIN_SRC emacs-lisp
   ;; (Add-to-list 'auto-mode-alist '("\\.js\\'" . js2-mode))
+#+END_SRC
+*** Haskell
+**** Haskell After Load
+#+BEGIN_SRC emacs-lisp
+  (with-eval-after-load 'haskell-mode
+    (defun milk-haskell-mode-defaults ()
+      (subword-mode +1)
+      (eldoc-mode +1)
+      (haskell-indentation-mode +1)
+      (interactive-haskell-mode +1))
+
+    (setq milk-haskell-mode-hook 'milk-haskell-mode-defaults)
+
+    (add-hook 'haskell-mode-hook (lambda ()
+                                   (run-hooks 'milk-haskell-mode-hook))))
 #+END_SRC
 
 ** Keys
