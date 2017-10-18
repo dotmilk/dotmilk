@@ -45,6 +45,11 @@
           (add-to-list 'custom-theme-load-path name)
           (milk-add-subfolders-to-custom-theme-path name)))))
 #+END_SRC
+**** Various Variables
+#+BEGIN_SRC emacs-lisp
+  (setq geiser-chez-binary "chez")
+  (setq geiser-active-implementations '(chez))
+#+END_SRC
 *** Setup Directories
 **** Root Dir Of Milk
 #+BEGIN_SRC emacs-lisp
@@ -87,7 +92,8 @@
 **** Font
 #+BEGIN_SRC emacs-lisp
   (setq default-frame-alist
-        '((font . "Source Code Pro for Powerline")
+        '(;; (font . "Source Code Pro for Powerline")
+          (font . "Hack")
           (vertical-scroll-bars . nil)))
 #+END_SRC
 **** Disable Tool Bar
@@ -143,8 +149,9 @@
 *** Visual Goodies
 **** Theme
 #+BEGIN_SRC emacs-lisp
-  (setq darkokai-mode-line-padding 1)
-  (load-theme 'darkokai t)
+  ;;(setq darkokai-mode-line-padding 1)
+  ;;(load-theme 'darkokai t)
+  (load-theme 'doom-one t)
 #+END_SRC
 **** Smart Modeline
 #+BEGIN_SRC emacs-lisp
@@ -520,7 +527,7 @@
     (when (executable-find ispell-program-name)
       (flyspell-mode +1)))
 
-  (add-hook 'text-mode-hook 'milk-enable-flyspell)
+  ;; (add-hook 'text-mode-hook 'milk-enable-flyspell)
   (eval-after-load "flyspell"
     '(diminish 'flyspell-mode))
 #+END_SRC
@@ -528,6 +535,7 @@
 #+BEGIN_SRC emacs-lisp
   (defun milk-enable-whitespace ()
     (add-hook 'before-save-hook 'whitespace-cleanup)
+    (setq whitespace-style '(face tabs empty trailing))
     (whitespace-mode +1))
   (eval-after-load "whitespace"
     '(progn
@@ -1313,7 +1321,10 @@
 *** Javascript
 **** Auto-Mode JS Files
 #+BEGIN_SRC emacs-lisp
-  ;; (Add-to-list 'auto-mode-alist '("\\.js\\'" . js2-mode))
+  (add-to-list 'auto-mode-alist '("\\.js\\'" . js2-mode))
+  (set 'js2-strict-missing-semi-warning nil)
+  (set 'js2-basic-offset 4)
+  ;;(advice-add 'indent-new-comment-line :around #'my-prettify-js-block-comment)
 #+END_SRC
 *** Haskell
 **** Haskell After Load
@@ -1323,7 +1334,9 @@
       (subword-mode +1)
       (eldoc-mode +1)
       (haskell-indentation-mode +1)
-      (interactive-haskell-mode +1))
+      (intero-mode +1)
+      ;; (interactive-haskell-mode +1)
+      )
 
     (setq milk-haskell-mode-hook 'milk-haskell-mode-defaults)
 
