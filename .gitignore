@@ -45,3 +45,8 @@ milk.org[*Org Src milk.org[ emacs-lisp ]*]
 
 # Folders to ignore
 node_modules
+var
+
+# Misc
+abbrev_defs
+network-security.data

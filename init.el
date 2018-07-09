@@ -1,9 +1,16 @@
-
 ;; Added by Package.el.  This must come before configurations of
 ;; installed packages.  Don't delete this line.  If you don't want it,
 ;; just comment it out by adding a semicolon to the start of the line.
 ;; You may delete these explanatory comments.
+;;(setq esup-child-profile-require-level 0)
 (package-initialize)
+;; (require 'cask "/usr/local/share/emacs/site-lisp/cask/cask.el")
+;; (cask-initialize)
+;; (add-hook 'after-init-hook 'exec-path-from-shell-initialize)
+;; (require 'pallet)
+;; (pallet-mode t)
+;;(require 'benchmark-init)
+;; To disable collection of benchmark data after init is done.
 
 (defconst emacs-start-time (current-time))
 (setq gc-cons-threshold 100000000)
@@ -37,7 +44,7 @@
           (goto-char (point-max))))))))
 
 (untangle-custom)
-
+;;(add-hook 'after-init-hook 'benchmark-init/deactivate)
 (let ((elapsed (float-time (time-subtract (current-time)
 					  emacs-start-time))))
   (message "Finished settings in (%.3fs)" elapsed))

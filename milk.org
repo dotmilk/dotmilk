@@ -48,7 +48,9 @@
 **** Various Variables
 #+BEGIN_SRC emacs-lisp
   (setq geiser-chez-binary "chez")
-  (setq geiser-active-implementations '(chez))
+  (setq geiser-active-implementations '(chez guile chicken racket))
+  (setq geiser-mode-smart-tab-p nil)
+  (setq exec-path-from-shell-check-startup-files nil)
 #+END_SRC
 *** Setup Directories
 **** Root Dir Of Milk
@@ -140,7 +142,7 @@
 *** Pallet Magic
 **** Pallet
 #+BEGIN_SRC emacs-lisp
-  (require 'cask)
+  (require 'cask "/usr/local/share/emacs/site-lisp/cask/cask.el")
   (cask-initialize)
   (add-hook 'after-init-hook 'exec-path-from-shell-initialize)
   (require 'pallet)
@@ -346,11 +348,15 @@
     (mapc 'kill-buffer (delq (current-buffer) (buffer-list))))
 #+END_SRC
 *** Sane Editing
+**** String Inflecting Goodness
+#+BEGIN_SRC emacs-lisp
+  (require 'string-inflection)
+#+END_SRC
 **** Fucking Tabs And Indents
 #+BEGIN_SRC emacs-lisp
   (defvar milk-yank-indent-threshold 1000)
   (defvar milk-indent-sensitive-modes
-    '(conf-mode coffee-mode haml-mode python-mode slim-mode yaml-mode))
+    '(conf-mode coffee-mode haml-mode python-mode elm-mode slim-mode yaml-mode))
   (defvar milk-yank-indent-modes '(LaTeX-mode TeX-mode))
   (setq-default indent-tabs-mode nil)
   (setq-default tab-width 8)
@@ -395,9 +401,9 @@
 #+END_SRC
 **** Autosave Undo-Tree History
 #+BEGIN_SRC emacs-lisp
-  (setq undo-tree-history-directory-alist
-        `((".*" . ,temporary-file-directory)))
-  (setq undo-tree-auto-save-history t)
+  ; (setq undo-tree-history-directory-alist
+  ;;       `((".*" . ,temporary-file-directory)))
+  ;; (setq undo-tree-auto-save-history t)
 #+END_SRC
 **** Autorevert Buffers When Changed Externally
 #+BEGIN_SRC emacs-lisp
@@ -520,16 +526,16 @@
 #+END_SRC
 **** Get Dank Spellchecking Action
 #+BEGIN_SRC emacs-lisp
-  (setq ispell-program-name "aspell" ; use aspell instead of ispell
-        ispell-extra-args '("--sug-mode=ultra"))
+  ;; (setq ispell-program-name "aspell" ; use aspell instead of ispell
+  ;;       ispell-extra-args '("--sug-mode=ultra"))
 
-  (defun milk-enable-flyspell ()
-    (when (executable-find ispell-program-name)
-      (flyspell-mode +1)))
+  ;; (defun milk-enable-flyspell ()
+  ;;   (when (executable-find ispell-program-name)
+  ;;     (flyspell-mode +1)))
 
-  ;; (add-hook 'text-mode-hook 'milk-enable-flyspell)
-  (eval-after-load "flyspell"
-    '(diminish 'flyspell-mode))
+  ;; ;; (add-hook 'text-mode-hook 'milk-enable-flyspell)
+  ;; (eval-after-load "flyspell"
+  ;;   '(diminish 'flyspell-mode))
 #+END_SRC
 **** Clean Up Nasty Whitespace
 #+BEGIN_SRC emacs-lisp
@@ -589,8 +595,8 @@
 #+END_SRC
 **** Sensible Undo
 #+BEGIN_SRC emacs-lisp
-  (global-undo-tree-mode)
-  (diminish 'undo-tree-mode)
+  ;; (global-undo-tree-mode)
+  ;; (diminish 'undo-tree-mode)
 #+END_SRC
 **** Diff-hl
 #+BEGIN_SRC emacs-lisp
@@ -722,6 +728,7 @@
     (milk-mode -1))
 
   (milk-global-mode)
+  (set 'sw/location 1854964)
 #+END_SRC
 **** Org-Mode
 #+BEGIN_SRC emacs-lisp
@@ -878,14 +885,9 @@
     (smex-initialize))
   (add-hook 'after-init-hook '(lambda () (ido-mode +1)))
 #+END_SRC
-*** Rvm
-#+BEGIN_SRC emacs-lisp
-  (require 'rvm)
-  (rvm-use-default)
-#+END_SRC
 *** Elfeed
 #+BEGIN_SRC emacs-lisp
-  (elfeed-org)
+  ;;(elfeed-org)
 #+END_SRC
 *** SrSpeedbar
 #+BEGIN_SRC emacs-lisp
@@ -918,9 +920,9 @@
   (defvar milk-flyspell 1)
   (defun milk-prog-mode-defaults ()
     "Default coding hook, useful with any programming language."
-    (when (and (executable-find ispell-program-name)
-               milk-flyspell)
-      (flyspell-prog-mode))
+    ;; (when (and (executable-find ispell-program-name)
+    ;;            milk-flyspell)
+    ;;   (flyspell-prog-mode))
     (smartparens-mode +1)
     (flycheck-mode)
     (milk-enable-whitespace)
@@ -951,13 +953,27 @@
 #+BEGIN_SRC emacs-lisp
   (global-company-mode 1)
 #+END_SRC
+*** Scheme
+**** Define Generic Scheme Hook
+#+BEGIN_SRC emacs-lisp
+  (defun milk-scheme-coding-defaults ()
+    (setq gesier-active-implementations '(chez))
+    (setq tab-always-indent t)
+    (setq geiser-default-implementation 'chez)
+    (parinfer-mode +1)
+    (geiser-mode +1))
+  (setq milk-scheme-coding-hook 'milk-scheme-coding-defaults)
+#+END_SRC
+**** Set Generic Scheme Hook
+#+BEGIN_SRC emacs-lisp
+  (add-hook 'scheme-mode-hook (lambda () (run-hooks 'milk-scheme-coding-hook)))
+#+END_SRC
 *** Lisp
 **** Define Generic Lisp Hook
 #+BEGIN_SRC emacs-lisp
   (defun milk-lisp-coding-defaults ()
     (smartparens-strict-mode +1)
-    (rainbow-delimiters-mode +1)
-    (aggressive-indent-mode +1))
+    (rainbow-delimiters-mode +1))
   (setq milk-lisp-coding-hook 'milk-lisp-coding-defaults)
 #+END_SRC
 **** Define Generic Interactive Lisp Hook
@@ -1260,6 +1276,8 @@
   (eval-after-load 'ruby-mode
     '(progn
        (defun prelude-ruby-mode-defaults ()
+         (require 'rvm)
+         (rvm-use-default)
          (inf-ruby-minor-mode +1)
          (ruby-tools-mode +1)
          ;; CamelCase aware editing operations
@@ -1319,7 +1337,7 @@
     (setenv "OPEN_DYLAN_USER_REGISTRIES" "/Users/sethprice/forge/registry"))
 #+END_SRC
 *** Javascript
-**** Auto-Mode JS Files
+**** COMMENT Auto-Mode JS Files
 #+BEGIN_SRC emacs-lisp
   (add-to-list 'auto-mode-alist '("\\.js\\'" . js2-mode))
   (set 'js2-strict-missing-semi-warning nil)
@@ -1346,6 +1364,15 @@
 
 ** Keys
 *** Global
+**** General Magic
+#+BEGIN_SRC emacs-lisp
+  (define-key key-translation-map (kbd "<s-mouse-1>") (kbd "<mouse-2>"))
+  ;; Lets do some inflecting!!!1
+  (global-set-key (kbd "C-c i") 'string-inflection-cycle)
+  (global-set-key (kbd "C-c u") 'string-inflection-camelcase)        ;; Force to CamelCase
+  (global-set-key (kbd "C-c c") 'string-inflection-lower-camelcase)  ;; Force to lowerCamelCase
+  (global-set-key (kbd "C-c j") 'string-inflection-java-style-cycle) ;; Cycle through Java styles
+#+END_SRC
 **** Anzu
 #+BEGIN_SRC emacs-lisp
   (global-set-key (kbd "M-%") 'anzu-query-replace)
@@ -1375,7 +1402,7 @@
 #+END_SRC
 **** Fuck Suspend Buffer - Undo / Redo Instead
 #+BEGIN_SRC emacs-lisp
-  (defalias 'redo 'undo-tree-redo)
+  ;; (defalias 'redo 'undo-tree-redo)
   (global-set-key (kbd "C-z") 'undo)
   (global-set-key (kbd "C-S-z") 'redo)
 #+END_SRC
@@ -1402,7 +1429,7 @@
 #+END_SRC
 **** Lisp
 #+BEGIN_SRC emacs-lisp
-  (define-key read-expression-map (kbd "TAB") 'completion-at-point)
+  ;(define-key read-expression-map (kbd "TAB") 'completion-at-point)
   ; Don't think these are needed
   ;(define-key lisp-mode-shared-map (kbd "M-(") (milk-wrap-with "("))
   ;(define-key lisp-mode-shared-map (kbd "M-\"") (milk-wrap-with "\""))
@@ -1425,6 +1452,12 @@
   (with-eval-after-load "slime"
     (define-key slime-mode-map (kbd "TAB") 'slime-indent-and-complete-symbol)
     (define-key slime-mode-map (kbd "C-c C-s") 'slime-selector))
+#+END_SRC
+**** Js2mode
+#+BEGIN_SRC emacs-lisp
+  (with-eval-after-load "js2-mode"
+    (define-key js2-mode-map (kbd "C-c n") 'js2-next-error)
+    (define-key js2-mode-map (kbd "<S-return>") 'js2-line-break))
 #+END_SRC
 *** Help
 **** Display Manuals
