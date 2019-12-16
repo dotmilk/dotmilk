@@ -95,7 +95,7 @@
 #+BEGIN_SRC emacs-lisp
   (setq default-frame-alist
         '(;; (font . "Source Code Pro for Powerline")
-          (font . "Hack")
+          (font . "Fantasque Sans Mono 13")
           (vertical-scroll-bars . nil)))
 #+END_SRC
 **** Disable Tool Bar
@@ -153,7 +153,8 @@
 #+BEGIN_SRC emacs-lisp
   ;;(setq darkokai-mode-line-padding 1)
   ;;(load-theme 'darkokai t)
-  (load-theme 'doom-one t)
+  (load-theme 'doom-peacock t)
+  ;; (load-theme 'eziam-dusk t)
 #+END_SRC
 **** Smart Modeline
 #+BEGIN_SRC emacs-lisp
@@ -540,7 +541,14 @@
 **** Clean Up Nasty Whitespace
 #+BEGIN_SRC emacs-lisp
   (defun milk-enable-whitespace ()
-    (add-hook 'before-save-hook 'whitespace-cleanup)
+    (defun clean-up ()
+      (message "ugh")
+      (when (eq major-mode 'forth-mode)
+        ;; (align-regexp (point-min) (point-max)
+        ;;               "\\(\\s-*\\)[[:space:]][[:space:]]+" 1 1 nil)
+        )
+      (whitespace-cleanup))
+    (add-hook 'before-save-hook 'clean-up)
     (setq whitespace-style '(face tabs empty trailing))
     (whitespace-mode +1))
   (eval-after-load "whitespace"
@@ -906,7 +914,8 @@
   (with-eval-after-load 'flycheck
     (diminish 'flycheck-mode " √")
     (setq-default flycheck-disabled-checkers '(emacs-lisp-checkdoc
-                                               javascript-jshint))
+                                               javascript-jshint
+                                               haskell-stack-ghc))
     (flycheck-add-mode 'javascript-eslint 'javascript-mode))
 #+END_SRC
 **** { } Smartparen Return Opens Indented Line
@@ -952,6 +961,16 @@
 **** Turn Company On
 #+BEGIN_SRC emacs-lisp
   (global-company-mode 1)
+#+END_SRC
+*** Assembly
+**** Auto-Mode Nasm
+#+BEGIN_SRC emacs-lisp
+  (add-to-list 'auto-mode-alist '("\\.asm\\'" . nasm-mode))
+#+END_SRC
+*** Forth
+**** Set Forth Hook
+#+BEGIN_SRC emacs-lisp
+  (add-hook 'forth-mode-hook (lambda () (turn-off-smartparens-mode)))
 #+END_SRC
 *** Scheme
 **** Define Generic Scheme Hook
@@ -1349,15 +1368,16 @@
 #+BEGIN_SRC emacs-lisp
   (with-eval-after-load 'haskell-mode
     (defun milk-haskell-mode-defaults ()
+      (add-hook 'haskell-mode-hook #'flycheck-haskell-setup)
       (subword-mode +1)
       (eldoc-mode +1)
       (haskell-indentation-mode +1)
-      (intero-mode +1)
-      ;; (interactive-haskell-mode +1)
+      (interactive-haskell-mode +1)
+      ;;(flycheck-haskell-setup)
       )
 
     (setq milk-haskell-mode-hook 'milk-haskell-mode-defaults)
-
+    (add-hook 'haskell-mode-hook #'flycheck-haskell-setup)
     (add-hook 'haskell-mode-hook (lambda ()
                                    (run-hooks 'milk-haskell-mode-hook))))
 #+END_SRC
@@ -1372,6 +1392,10 @@
   (global-set-key (kbd "C-c u") 'string-inflection-camelcase)        ;; Force to CamelCase
   (global-set-key (kbd "C-c c") 'string-inflection-lower-camelcase)  ;; Force to lowerCamelCase
   (global-set-key (kbd "C-c j") 'string-inflection-java-style-cycle) ;; Cycle through Java styles
+  (defun milk/align-dbl-space (start end)
+    (interactive "r")
+    (align-regexp start end
+                  "\\(\\s-*\\)[[:space:]][[:space:]]+" 1 1 nil))
 #+END_SRC
 **** Anzu
 #+BEGIN_SRC emacs-lisp
