@@ -4,6 +4,9 @@ private
 savefile
 vendor
 games
+transient
+emms
+jabber-avatar-cache
 .cask
 
 #ignore interlock
