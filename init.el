@@ -38,6 +38,8 @@
          ((looking-at "^#\\+BEGIN_SRC +emacs-lisp *$")
           (let ((l (match-end 0)))
             (search-forward "\n#+END_SRC")
+            ;; (append-to-file l (match-beginning 0)
+            ;;                 (expand-file-name "milk.el" milk-dir))
             (eval-region l (match-beginning 0))))
          ;; Finish on the next level-1 header
          ((looking-at "^\\* ")
