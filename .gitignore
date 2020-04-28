@@ -29,7 +29,7 @@ _site
 *.zip
 *.vi
 *~
-
+session.*
 # OS or Editor folders
 .DS_Store
 ._*
@@ -45,7 +45,7 @@ nbproject
 .idea
 
 milk.org[*Org Src milk.org[ emacs-lisp ]*]
-
+\#*
 # Folders to ignore
 node_modules
 var
