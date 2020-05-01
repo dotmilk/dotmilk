@@ -135,6 +135,7 @@
 (depends-on "volatile-highlights")
 (depends-on "web-mode")
 (depends-on "which-key")
+(depends-on "windresize")
 (depends-on "with-editor")
 (depends-on "yaml-mode")
 (depends-on "yari")

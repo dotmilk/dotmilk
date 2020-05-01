@@ -182,7 +182,7 @@
   ;;(load-theme 'ample-light t)
   ;;(load-theme 'nil-st t)
   (setq custom-safe-themes t)
-  (load-theme 'doom-laserwave t)
+  (load-theme 'doom-outrun-electric t)
   ;;(load-theme 'ample-flat t)
   ;;(setq rand-theme-wanted '(ample-light ample-flat))
   ;;(rand-theme)
@@ -794,6 +794,7 @@
     (define-key map (kbd "e") 'export-to-blog))
 
   (let ((map milk-mode-files-keymap))
+    (define-key map (kbd "t") 'milk-start-twitch-chat)
     (define-key map (kbd "c") 'milk-customize)
     (define-key map (kbd "r") 'recentf-ido-find-file)
     (define-key map (kbd "o") 'kill-other-buffers))
@@ -1173,7 +1174,7 @@
 **** Default To Sbcl
 #+BEGIN_SRC emacs-lisp
   (setq slime-lisp-implementations
-        '((sbcl ("/usr/local/bin/sbcl" "--noinform") :coding-system utf-8-unix)))
+        '((sbcl ("/usr/bin/sbcl" "--noinform") :coding-system utf-8-unix)))
   (setq slime-default-lisp 'sbcl)
 #+END_SRC
 **** Define Slime Hook

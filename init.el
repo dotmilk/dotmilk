@@ -50,4 +50,5 @@
 (let ((elapsed (float-time (time-subtract (current-time)
 					  emacs-start-time))))
   (message "Finished settings in (%.3fs)" elapsed))
-(setq gc-cons-threshold 50000000)
+(setq gc-cons-threshold 50000000
+)
