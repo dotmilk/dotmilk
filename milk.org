@@ -8,6 +8,11 @@
     (getenv
      (if (equal system-type 'windows-nt) "USERNAME" "USER")))
 #+END_SRC
+**** Other thing
+So the thing about this is.......
+#+BEGIN_SRC emacs-lisp
+  (+ 1 2)
+#+END_SRC
 **** Use Newest Byte Code
 #+BEGIN_SRC emacs-lisp
   (setq load-prefer-newer t)
@@ -182,7 +187,18 @@
   ;;(load-theme 'ample-light t)
   ;;(load-theme 'nil-st t)
   (setq custom-safe-themes t)
-  (load-theme 'doom-outrun-electric t)
+
+  ;; good combo
+  ;; (load-theme 'doom-Iosvkem)
+  ;; (load-theme 'soothe)
+  ;; (load-theme 'doom-Iosvkem)
+
+  ;; (load-theme 'clues)
+  ;; (load-theme 'doom-Iosvkem)
+  ;; (load-theme 'clues)
+  (load-theme 'ultralisk)
+
+  ;;(load-theme 'doom-outrun-electric t)
   ;;(load-theme 'ample-flat t)
   ;;(setq rand-theme-wanted '(ample-light ample-flat))
   ;;(rand-theme)
@@ -610,11 +626,10 @@
 #+BEGIN_SRC emacs-lisp
   (defun milk-enable-whitespace ()
     (defun clean-up ()
-      (message "ugh")
-      (when (eq major-mode 'forth-mode)
+      (when (eq major-mode 'forth-mode))
         ;; (align-regexp (point-min) (point-max)
         ;;               "\\(\\s-*\\)[[:space:]][[:space:]]+" 1 1 nil)
-        )
+
       (whitespace-cleanup))
     (add-hook 'before-save-hook 'clean-up)
     (setq whitespace-style '(face tabs empty trailing))
@@ -831,6 +846,10 @@
     (require 'org-bullets)
     (require 'ox-md nil t)
     (require 'ox-gfm nil t)
+    (org-babel-do-load-languages
+     'org-babel-load-languages
+     '((haskell . t)
+       (jupyter . t)))
     (setq org-jekyll-use-src-plugin t)
     (setq org-use-property-inheritance t)
     (setq org-closed-keep-when-no-todo t)
@@ -984,6 +1003,27 @@
             (lambda ()
               (speedbar-change-initial-expansion-list "quick buffers")))
 #+End_SRC
+*** Jupyter Shit
+**** Base Setup
+#+BEGIN_SRC emacs-lisp
+  (add-to-list 'load-path "/home/dotmilk/.local/bin/jupyter")
+  (defun milk:json-patch (fn &rest args)
+    (let ((string (car args)))
+      (if (not (string= (substring string 0 1) "{"))
+          (setq string (substring string 12)))
+      (setcar args string)
+      (apply fn args)))
+
+  (advice-add 'ein:json-read-from-string :around #'milk:json-patch)
+
+
+  ;; (with-eval-after-load 'ein-cell
+  ;;   (set-face-extend 'ein:cell-input-area t))
+#+END_SRC
+*** Twitter
+#+BEGIN_SRC emacs-lisp
+#+END_SRC
+
 ** Programming
 *** Generic Programming
 **** Require Flycheck
@@ -1021,6 +1061,12 @@
   (setq milk-prog-mode-hook 'milk-prog-mode-defaults)
   (add-hook 'prog-mode-hook (lambda ()
                               (run-hooks 'milk-prog-mode-hook)))
+#+END_SRC
+*** Processing
+#+BEGIN_SRC emacs-lisp
+  (setq processing-location "/home/dotmilk/processing-3.5.4/processing-java")
+  (setq processing-application-dir "/home/dotmilk/processing-3.5.4")
+  (setq processing-sketchbook-dir "/home/dotmilk/sketchbook")
 #+END_SRC
 *** Company
 **** Require Company

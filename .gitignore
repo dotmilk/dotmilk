@@ -8,7 +8,7 @@ transient
 emms
 jabber-avatar-cache
 .cask
-
+request
 #ignore interlock
 .#*
 
