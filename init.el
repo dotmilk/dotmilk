@@ -11,7 +11,8 @@
 ;; (pallet-mode t)
 ;;(require 'benchmark-init)
 ;; To disable collection of benchmark data after init is done.
-
+(setq warning-minimum-level :emergency)
+(setf default-directory "/Users/dotmilk/")
 (defconst emacs-start-time (current-time))
 (setq gc-cons-threshold 100000000)
 (defvar milk-dir user-emacs-directory)
