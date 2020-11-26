@@ -183,6 +183,12 @@
   (when (version< emacs-version "24.4")
     (error "You need to be on atleast 24.4, but your bitch ass is running %s" emacs-version))
 #+END_SRC
+**** Define Idempotent Make File
+#+BEGIN_SRC emacs-lisp
+  (defun milk-idem-make-file (a-file)
+    (unless (file-exists-p custom-file)
+      (write-region "" nil custom-file)))
+#+END_SRC
 **** Define Idempotent Make Dir
 #+BEGIN_SRC emacs-lisp
   (defun milk-idem-make-dir (a-dir)
@@ -247,6 +253,7 @@
 **** Custom File
 #+BEGIN_SRC emacs-lisp
   (setq custom-file (expand-file-name "custom.el" milk-private-dir))
+  (milk-idem-make-file custom-file)
   (load custom-file)
 #+END_SRC
 **** Add Shit Above To 'load-path'
@@ -262,7 +269,7 @@
 #+BEGIN_SRC emacs-lisp
   (setq default-frame-alist
         '(;; (font . "Source Code Pro for Powerline")
-          (font . "Fantasque Sans Mono 13")
+          (font . "Fantasque Sans Mono 15")
           (vertical-scroll-bars . nil)))
 #+END_SRC
 **** Disable Tool Bar
@@ -352,14 +359,14 @@
   ;; good combo
   ;; (load-theme 'doom-Iosvkem)
   ;; (load-theme 'soothe)
-  ;; (load-theme 'doom-Iosvkem)
-
+  ;;(load-theme 'doom-Iosvkem)
+  ;;(load-theme 'b)
   ;; (load-theme 'clues)
-  (load-theme 'doom-Iosvkem)
+  ;;(load-theme 'doom-Iosvkem)
   ;; (load-theme 'clues)
   ;;(load-theme 'ultralisk)
 
-  ;;(load-theme 'doom-outrun-electric t)
+  (load-theme 'doom-outrun-electric t)
   ;;(load-theme 'ample-flat t)
   ;;(setq rand-theme-wanted '(ample-light ample-flat))
   ;;(rand-theme)
@@ -984,11 +991,12 @@
     (milk-mode -1))
 
   (milk-global-mode)
-  (set 'sw/location 1854964)
+  (set 'sw/location 4277241)
 #+END_SRC
 **** Org-Mode
 #+BEGIN_SRC emacs-lisp
   (defun milk-org-mode-hook ()
+    (require 'org-tempo)
     (whitespace-turn-off)
     (dolist (face '(org-level-1
                     org-level-2
@@ -1017,9 +1025,7 @@
     (setq org-log-done 'time)
     (setq org-src-ask-before-returning-to-edit-buffer nil)
     (add-to-list 'org-structure-template-alist
-                 '("se"
-                   "#+BEGIN_SRC emacs-lisp\n?\n#+END_SRC"
-                   "<src lang=\"emacs-lisp\">\n?\n</src>"))
+                 '("se" . "src emacs-lisp"))
     (setq org-n-level-faces 5)
     (setq org-hide-leading-stars t)
     (setq org-bullets-bullet-list
@@ -1212,6 +1218,8 @@
     ;;   (flyspell-prog-mode))
     (smartparens-mode +1)
     (flycheck-mode)
+    (dtrt-indent-mode 1)
+    (editorconfig-mode 1)
     (milk-enable-whitespace)
     (font-lock-add-keywords
      nil '(("\\<\\(\\(FIX\\(ME\\)?\\|TODO\\|OPTIMIZE\\|HACK\\|REFACTOR\\):\\)"
