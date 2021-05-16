@@ -223,6 +223,8 @@
   (setq geiser-active-implementations '(chez guile chicken racket))
   (setq geiser-mode-smart-tab-p nil)
   (setq exec-path-from-shell-check-startup-files nil)
+  (add-to-list 'initial-frame-alist '(height . 96))
+  (add-to-list 'initial-frame-alist '(width . 320))
 #+END_SRC
 *** Setup Directories
 **** Root Dir Of Milk
@@ -269,7 +271,7 @@
 #+BEGIN_SRC emacs-lisp
   (setq default-frame-alist
         '(;; (font . "Source Code Pro for Powerline")
-          (font . "Fantasque Sans Mono 15")
+          (font . "Fantasque Sans Mono 17")
           (vertical-scroll-bars . nil)))
 #+END_SRC
 **** Disable Tool Bar
@@ -366,11 +368,34 @@
   ;; (load-theme 'clues)
   ;;(load-theme 'ultralisk)
 
-  (load-theme 'doom-outrun-electric t)
+  ;;(load-theme 'doom-outrun-electric t)
   ;;(load-theme 'ample-flat t)
   ;;(setq rand-theme-wanted '(ample-light ample-flat))
   ;;(rand-theme)
-  ;; (load-theme 'doom-city-lights t)
+
+  (load-theme 'ample-flat t)
+  (load-theme 'doom-challenger-deep)
+  ;;(load-theme 'doom-sourcerer t)
+  ;;(load-theme 'doom-ayu-dark t)
+  ;; (use-package doom-themes
+  ;;              :config
+  ;;              ;; Global settings (defaults)
+  ;;              (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
+  ;;                    doom-themes-enable-italic t) ; if nil, italics is universally disabled
+
+  ;; ;;             (load-theme 'doom-one t)
+
+  ;;              ;; Enable flashing mode-line on errors
+  ;;              (doom-themes-visual-bell-config)
+
+  ;;              ;; Enable custom neotree theme (all-the-icons must be installed!)
+  ;;              (doom-themes-neotree-config)
+  ;;              ;; or for treemacs users
+  ;;              (setq doom-themes-treemacs-theme "doom-colors") ; use the colorful treemacs theme
+  ;;              (doom-themes-treemacs-config)
+
+  ;;              ;; Corrects (and improves) org-mode's native fontification.
+  ;;              (doom-themes-org-config))
   ;;(load-theme 'eziam-dusk t)
 #+END_SRC
 **** Smart Modeline
@@ -1051,7 +1076,9 @@
 #+END_SRC
 **** Projectile
 #+BEGIN_SRC emacs-lisp
+
   (with-eval-after-load "projectile"
+    (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
     (local-set-key (kbd "M-p") 'projectile-command-map)
     (setq projectile-cache-file
           (expand-file-name  "projectile.cache" milk-savefile-dir)))
@@ -1649,13 +1676,32 @@
     (setenv "OPEN_DYLAN_USER_REGISTRIES" "/Users/sethprice/forge/registry"))
 #+END_SRC
 *** Javascript
-**** COMMENT Auto-Mode JS Files
+**** Auto-Mode JS Files
 #+BEGIN_SRC emacs-lisp
   (add-to-list 'auto-mode-alist '("\\.js\\'" . js2-mode))
   (set 'js2-strict-missing-semi-warning nil)
   (set 'js2-basic-offset 4)
   ;;(advice-add 'indent-new-comment-line :around #'my-prettify-js-block-comment)
 #+END_SRC
+*** Typescript
+#+begin_src emacs-lisp
+  (defun setup-tide-mode ()
+    (interactive)
+    (tide-setup)
+    ;;  (flycheck-mode +1)
+    ;;  (setq flycheck-check-syntax-automatically '(save mode-enabled))
+    (eldoc-mode +1)
+    (tide-hl-identifier-mode +1)
+    ;; company is an optional dependency. You have to
+    ;; install it separately via package-install
+    ;; `M-x package-install [ret] company`
+    (company-mode +1))
+
+  ;; aligns annotation to the right hand side
+  (setq company-tooltip-align-annotations t)
+  (add-to-list 'auto-mode-alist '("\\.ts\\'" . typescript-mode))
+  (add-hook 'typescript-mode-hook #'setup-tide-mode)
+#+end_src
 *** Haskell
 **** Haskell After Load
 #+BEGIN_SRC emacs-lisp
