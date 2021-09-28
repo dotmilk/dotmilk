@@ -271,7 +271,7 @@
 #+BEGIN_SRC emacs-lisp
   (setq default-frame-alist
         '(;; (font . "Source Code Pro for Powerline")
-          (font . "Fantasque Sans Mono 17")
+          (font . "Input Mono Medium 15")
           (vertical-scroll-bars . nil)))
 #+END_SRC
 **** Disable Tool Bar
@@ -340,6 +340,20 @@
 
   ;; '(: bol "magit" (zero-or-more not-newline) eol)
 #+END_SRC
+**** Ask Before Closing
+#+BEGIN_SRC emacs-lisp
+  (defun ask-before-closing ()
+    "Ask whether or not to close, and then close if y was pressed"
+    (interactive)
+    (if (y-or-n-p (format "Are you sure you want to exit Emacs? "))
+        (if (< emacs-major-version 22)
+            (save-buffers-kill-terminal)
+          (save-buffers-kill-emacs))
+      (message "Canceled exit")))
+
+  (when window-system
+    (global-set-key (kbd "C-x C-c") 'ask-before-closing))
+#+END_SRC
 *** Pallet Magic
 **** Pallet
 #+BEGIN_SRC emacs-lisp
@@ -372,37 +386,30 @@
   ;;(load-theme 'ample-flat t)
   ;;(setq rand-theme-wanted '(ample-light ample-flat))
   ;;(rand-theme)
+  ;;
+
 
   (load-theme 'ample-flat t)
-  (load-theme 'doom-challenger-deep)
+  ;; (load-theme 'doom-dark+ t)
+  ;;(load-theme 'melancholy t)
+  (load-theme 'doom-dark+ t)
+  (load-theme 'ample-flat t)
+  (doom-themes-org-config)
+  ;;(load-theme 'doom-challenger-deep t)
   ;;(load-theme 'doom-sourcerer t)
   ;;(load-theme 'doom-ayu-dark t)
-  ;; (use-package doom-themes
-  ;;              :config
-  ;;              ;; Global settings (defaults)
-  ;;              (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
-  ;;                    doom-themes-enable-italic t) ; if nil, italics is universally disabled
 
-  ;; ;;             (load-theme 'doom-one t)
-
-  ;;              ;; Enable flashing mode-line on errors
-  ;;              (doom-themes-visual-bell-config)
-
-  ;;              ;; Enable custom neotree theme (all-the-icons must be installed!)
-  ;;              (doom-themes-neotree-config)
-  ;;              ;; or for treemacs users
-  ;;              (setq doom-themes-treemacs-theme "doom-colors") ; use the colorful treemacs theme
-  ;;              (doom-themes-treemacs-config)
-
-  ;;              ;; Corrects (and improves) org-mode's native fontification.
-  ;;              (doom-themes-org-config))
   ;;(load-theme 'eziam-dusk t)
+#+END_SRC
+**** Auto-Dim
+#+BEGIN_SRC emacs-lisp
+  (auto-dim-other-buffers-mode t)
 #+END_SRC
 **** Smart Modeline
 #+BEGIN_SRC emacs-lisp
   (require 'smart-mode-line)
   (setq sml/no-confirm-load-theme t
-        sml/theme 'respectful)
+        sml/theme 'dark)
   (add-hook 'after-init-hook #'sml/setup)
 #+END_SRC
 **** Setup Powerline
@@ -931,6 +938,7 @@
   (defvar milk-mode-magit-keymap nil)
   (defvar milk-mode-info-keymap nil)
   (defvar milk-mode-files-keymap nil)
+  (defvar milk-mode-typescript-keymap nil)
 
   (defgroup milk-key nil
     "Key prefix for milk related key commands."
@@ -950,6 +958,11 @@
   (defgroup milk-key-files nil
     "Key prefix for file related key commands under milk"
     :prefix "milk-key-files-"
+    :group 'milk)
+
+  (defgroup milk-key-typescript nil
+    "Key prefix for file related key commands under milk"
+    :prefix "milk-key-typescript-"
     :group 'milk)
 
 
@@ -973,10 +986,16 @@
     :type 'string
     :group 'milk)
 
+  (defcustom milk-key-typescript-command-prefix (kbd (concat milk-key-command-prefix "t"))
+    "The prefix for file related key commands under milk."
+    :type 'string
+    :group 'milk)
+
   (define-prefix-command 'milk-mode-keymap)
   (define-prefix-command 'milk-mode-magit-keymap)
   (define-prefix-command 'milk-mode-info-keymap)
   (define-prefix-command 'milk-mode-files-keymap)
+  (define-prefix-command 'milk-mode-typescript-keymap)
 
   (define-minor-mode milk-mode
     "Minor Mode To Scratch My Curiosity Itch.
@@ -987,7 +1006,8 @@
     :keymap `((,milk-key-command-prefix . milk-mode-keymap)
               (,milk-key-magit-command-prefix . milk-mode-magit-keymap)
               (,milk-key-info-command-prefix . milk-mode-info-keymap)
-              (,milk-key-files-command-prefix . milk-mode-files-keymap)))
+              (,milk-key-files-command-prefix . milk-mode-files-keymap)
+              (,milk-key-typescript-command-prefix . milk-mode-typescript-keymap)))
 
   (let ((map milk-mode-keymap)))
 
@@ -1006,6 +1026,15 @@
     (define-key map (kbd "c") 'milk-customize)
     (define-key map (kbd "r") 'recentf-ido-find-file)
     (define-key map (kbd "o") 'kill-other-buffers))
+
+  (let ((map milk-mode-typescript-keymap))
+    (define-key map (kbd "p") 'tide-restart-server)
+    (define-key map (kbd "n") 'tide-rename-symbol)
+    (define-key map (kbd "r") 'tide-refactor)
+    (define-key map (kbd "e") 'tide-goto-error)
+    (define-key map (kbd "f") 'tide-fix)
+    (define-key map (kbd "l") 'tide-references)
+    (define-key map (kbd "m") 'tide-rename-file))
 
   (define-globalized-minor-mode milk-global-mode milk-mode milk-on)
 
@@ -1245,7 +1274,7 @@
     ;;   (flyspell-prog-mode))
     (smartparens-mode +1)
     (flycheck-mode)
-    (dtrt-indent-mode 1)
+    ;; (dtrt-indent-mode 1)
     (editorconfig-mode 1)
     (milk-enable-whitespace)
     (font-lock-add-keywords
