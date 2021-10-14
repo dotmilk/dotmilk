@@ -1,4 +1,4 @@
-#+STARTUP: hideblocks
+s#+STARTUP: hideblocks
 * .milk
 ** Base
 *** Pre-Configuration Fun
@@ -271,7 +271,7 @@
 #+BEGIN_SRC emacs-lisp
   (setq default-frame-alist
         '(;; (font . "Source Code Pro for Powerline")
-          (font . "Input Mono Medium 15")
+          (font . "Input Mono Medium 17")
           (vertical-scroll-bars . nil)))
 #+END_SRC
 **** Disable Tool Bar
@@ -294,8 +294,37 @@
 #+BEGIN_SRC emacs-lisp
   (setq inhibit-startup-screen t)
 #+END_SRC
-**** Disable Bell
+**** Terminal Setup
 #+BEGIN_SRC emacs-lisp
+  ;;; xterm key decoding
+  ;; As of this writing, emacs does not correctly recognize some xterm
+  ;; key sequences.  Add code to deal with these.
+  (defun add-escape-key-mapping-alist (escape-prefix key-prefix
+                                                     suffix-alist)
+    "Add mappings for up, down, left and right keys for a given list
+  of escape sequences and list of keys."
+    (while suffix-alist
+      (let ((escape-suffix (car (car suffix-alist)))
+            (key-suffix (cdr (car suffix-alist))))
+        (define-key input-decode-map (concat escape-prefix escape-suffix)
+          (read-kbd-macro (concat key-prefix key-suffix))))
+      (setq suffix-alist (cdr suffix-alist))))
+
+  (defun my-setup-input-decode-map ()
+    (setq nav-key-pair-alist
+          '(("A" . "<up>") ("B" . "<down>") ("C" . "<right>") ("D" . "<left>")
+            ("H" . "<home>") ("F" . "<end>")))
+
+    (add-escape-key-mapping-alist "\e[1;2" "S-" nav-key-pair-alist)
+    (add-escape-key-mapping-alist "\e[1;3" "M-" nav-key-pair-alist)
+    (add-escape-key-mapping-alist "\e[1;4" "M-S-" nav-key-pair-alist)
+    (add-escape-key-mapping-alist "\e[1;6" "C-S-" nav-key-pair-alist)
+    (add-escape-key-mapping-alist "\e[1;7" "M-C-" nav-key-pair-alist)
+    (add-escape-key-mapping-alist "\e[1;8" "M-C-S-" nav-key-pair-alist))
+
+  (my-setup-input-decode-map)
+  (add-to-list 'term-file-aliases '("alacritty" . "xterm"))
+  (add-to-list 'term-file-aliases '("alacritty-direct" . "xterm"))
   (setq ring-bell-function 'ignore)
 #+END_SRC
 **** Lubricate Scrolling
@@ -357,7 +386,7 @@
 *** Pallet Magic
 **** Pallet
 #+BEGIN_SRC emacs-lisp
-  (require 'cask "/usr/local/share/emacs/site-lisp/cask/cask.el")
+  (require 'cask "/home/dotmilk/silverware/cask/cask.el")
   (cask-initialize)
   (add-hook 'after-init-hook 'exec-path-from-shell-initialize)
   (require 'pallet)
@@ -470,7 +499,8 @@
   (setq parinfer-extensions
         '(default pretty-parens smart-yank))
   (defun milk-use-parinfer ()
-    (parinfer-mode +1))
+    ;; (parinfer-mode +1)
+    )
 #+END_SRC
 **** Trace
 #+BEGIN_SRC emacs-lisp
@@ -987,7 +1017,12 @@
     :group 'milk)
 
   (defcustom milk-key-typescript-command-prefix (kbd (concat milk-key-command-prefix "t"))
-    "The prefix for file related key commands under milk."
+    "The prefix for typescript related key commands under milk."
+    :type 'string
+    :group 'milk)
+
+  (defcustom milk-key-counsel-command-prefix (kbd (concat milk-key-command-prefix "c"))
+    "The prefix for counsel key commands under milk."
     :type 'string
     :group 'milk)
 
@@ -996,6 +1031,7 @@
   (define-prefix-command 'milk-mode-info-keymap)
   (define-prefix-command 'milk-mode-files-keymap)
   (define-prefix-command 'milk-mode-typescript-keymap)
+  (define-prefix-command 'milk-mode-counsel-keymap)
 
   (define-minor-mode milk-mode
     "Minor Mode To Scratch My Curiosity Itch.
@@ -1007,7 +1043,8 @@
               (,milk-key-magit-command-prefix . milk-mode-magit-keymap)
               (,milk-key-info-command-prefix . milk-mode-info-keymap)
               (,milk-key-files-command-prefix . milk-mode-files-keymap)
-              (,milk-key-typescript-command-prefix . milk-mode-typescript-keymap)))
+              (,milk-key-typescript-command-prefix . milk-mode-typescript-keymap)
+              (,milk-key-counsel-command-prefix . milk-mode-counsel-keymap)))
 
   (let ((map milk-mode-keymap)))
 
@@ -1028,13 +1065,24 @@
     (define-key map (kbd "o") 'kill-other-buffers))
 
   (let ((map milk-mode-typescript-keymap))
+    (define-key map (kbd "i") 'tide-documentation-at-point)
+    (define-key map (kbd "o") 'tide-organize-imports)
+    (define-key map (kbd "d") 'tide-jump-to-definition)
     (define-key map (kbd "p") 'tide-restart-server)
     (define-key map (kbd "n") 'tide-rename-symbol)
     (define-key map (kbd "r") 'tide-refactor)
-    (define-key map (kbd "e") 'tide-goto-error)
+    (define-key map (kbd "e") 'tide-project-errors)
     (define-key map (kbd "f") 'tide-fix)
     (define-key map (kbd "l") 'tide-references)
     (define-key map (kbd "m") 'tide-rename-file))
+
+  (let ((map milk-mode-counsel-keymap))
+    (define-key map (kbd "a") 'counsel-ag)
+    (define-key map (kbd "q") 'counsel-set-variable)
+    (define-key map (kbd "v") 'counsel-describe-variable)
+    (define-key map (kbd "f") 'counsel-describe-function)
+    (define-key map (kbd "g") 'counsel-org-goto)
+    (define-key map (kbd "s") 'counsel-search))
 
   (define-globalized-minor-mode milk-global-mode milk-mode milk-on)
 
@@ -1102,6 +1150,7 @@
           (if (and b e (< (point) e)) (setq rlt nil)))
         (setq ad-return-value rlt)))
     (add-hook 'org-mode-hook 'milk-org-mode-hook))
+  (setq org-hide-block-startup t)
 #+END_SRC
 **** Projectile
 #+BEGIN_SRC emacs-lisp
@@ -1191,26 +1240,32 @@
 #+END_SRC
 **** Ido
 #+BEGIN_SRC emacs-lisp
-  (with-eval-after-load "ido"
-    (setq ido-enable-prefix nil
-          ido-enable-flex-matching t
-          ido-create-new-buffer 'always
-          ido-use-filename-at-point 'guess
-          ido-max-prospects 10
-          ido-save-directory-list-file (expand-file-name "ido.hist" milk-savefile-dir)
-          ido-default-file-method 'selected-window
-          ido-auto-merge-work-directories-length -1)
-    (ido-ubiquitous-mode +1)
-    (flx-ido-mode +1)
-    (setq ido-use-faces nil)
-    (setq smex-save-file (expand-file-name ".smex-items" milk-savefile-dir))
-    (smex-initialize)
-    (defun bad-buffers (name)
-      (with-current-buffer name
-        (derived-mode-p 'magit-mode)))
-    (add-to-list 'ido-ignore-buffers
-                 'bad-buffers))
+  (with-eval-after-load "ivy"
+    (setq ivy-use-virtual-buffers t)
+    (setq enable-recursive-minibuffers t)
+    (setq counsel-search-engine 'google))
   (add-hook 'after-init-hook '(lambda () (ido-mode +1)))
+  ;; use ivy instead for now
+  ;; (with-eval-after-load "ido"
+  ;;   (setq ido-enable-prefix nil
+  ;;         ido-enable-flex-matching t
+  ;;         ido-create-new-buffer 'always
+  ;;         ido-use-filename-at-point 'guess
+  ;;         ido-max-prospects 10
+  ;;         ido-save-directory-list-file (expand-file-name "ido.hist" milk-savefile-dir)
+  ;;         ido-default-file-method 'selected-window
+  ;;         ido-auto-merge-work-directories-length -1)
+  ;;   (ido-ubiquitous-mode +1)
+  ;;   (flx-ido-mode +1)
+  ;;   (setq ido-use-faces nil)
+  ;;   (setq smex-save-file (expand-file-name ".smex-items" milk-savefile-dir))
+  ;;   (smex-initialize)
+  ;;   (defun bad-buffers (name)
+  ;;     (with-current-buffer name
+  ;;       (derived-mode-p 'magit-mode)))
+  ;;   (add-to-list 'ido-ignore-buffers
+  ;;                'bad-buffers))
+  ;; (add-hook 'after-init-hook '(lambda () (ido-mode +1)))
 #+END_SRC
 *** Elfeed
 #+BEGIN_SRC emacs-lisp
@@ -1229,7 +1284,7 @@
 *** Jupyter Shit
 **** Base Setup
 #+BEGIN_SRC emacs-lisp
-  (add-to-list 'load-path "/usr/local/bin/jupyter")
+  (add-to-list 'load-path "/home/dotmilk/.local/bin/jupyter")
   (defun milk:json-patch (fn &rest args)
     (let ((string (car args)))
       (if (not (string= (substring string 0 1) "{"))
@@ -1237,7 +1292,7 @@
       (setcar args string)
       (apply fn args)))
 
-  (advice-add 'ein:json-read-from-string :around #'milk:json-patch)
+  ;; (advice-add 'ein:json-read-from-string :around #'milk:json-patch)
 
 
   ;; (with-eval-after-load 'ein-cell
@@ -1445,7 +1500,7 @@
 **** Default To Sbcl
 #+BEGIN_SRC emacs-lisp
   (setq slime-lisp-implementations
-        '((sbcl ("/usr/local/bin/sbcl" "--noinform") :coding-system utf-8-unix)))
+        '((sbcl ("/usr/bin/sbcl" "--noinform") :coding-system utf-8-unix)))
   (setq slime-default-lisp 'sbcl)
 #+END_SRC
 **** Define Slime Hook
@@ -1785,6 +1840,14 @@
     (global-set-key (kbd "C-c <right>") 'windmove-right)
     (global-set-key (kbd "C-c <up>")    'windmove-up)
     (global-set-key (kbd "C-c <down>")  'windmove-down))
+
+  ;; Just ivy things
+  (global-set-key (kbd "C-s") 'swiper-isearch)
+  (global-set-key (kbd "M-x") 'counsel-M-x)
+  (global-set-key (kbd "C-x C-f") 'counsel-find-file)
+  (global-set-key (kbd "C-x b") 'ivy-switch-buffer)
+  (global-set-key (kbd "C-c v") 'ivy-push-view)
+  (global-set-key (kbd "C-c V") 'ivy-pop-view)
 #+END_SRC
 **** Anzu
 #+BEGIN_SRC emacs-lisp
@@ -1811,7 +1874,8 @@
 #+END_SRC
 **** Fuck Off With The Fill
 #+BEGIN_SRC emacs-lisp
-  (global-set-key (kbd "C-x f") 'ido-find-file)
+  ;; (global-set-key (kbd "C-x f") 'ido-find-file)
+  (global-set-key (kbd "C-x f") 'counsel-find-file)
 #+END_SRC
 **** Fuck Suspend Buffer - Undo / Redo Instead
 #+BEGIN_SRC emacs-lisp

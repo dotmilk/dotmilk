@@ -1,4 +1,6 @@
 # Ignore some dirs
+smex-items
+tramp
 elpa
 private
 savefile
