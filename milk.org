@@ -1,4 +1,4 @@
-s#+STARTUP: hideblocks
+#+STARTUP: hideblocks
 * .milk
 ** Base
 *** Pre-Configuration Fun
@@ -711,8 +711,8 @@ s#+STARTUP: hideblocks
 #+BEGIN_SRC emacs-lisp
   (setq backup-directory-alist
         `((".*" . ,temporary-file-directory)))
-  (setq auto-save-file-name-transforms
-        `((".*" ,temporary-file-directory t)))
+  ;; (setq auto-save-file-name-transforms
+  ;;       `((".*" ,temporary-file-directory t)))
 #+END_SRC
 **** Autosave Undo-Tree History
 #+BEGIN_SRC emacs-lisp
@@ -1062,7 +1062,10 @@ s#+STARTUP: hideblocks
     (define-key map (kbd "t") 'milk-start-twitch-chat)
     (define-key map (kbd "c") 'milk-customize)
     (define-key map (kbd "r") 'recentf-ido-find-file)
-    (define-key map (kbd "o") 'kill-other-buffers))
+    (define-key map (kbd "o") 'kill-other-buffers)
+    (define-key map (kbd "b") 'burly-bookmark-windows)
+    (define-key map (kbd "d") 'bookmark-delete)
+    (define-key map (kbd "f") 'burly-open-bookmark))
 
   (let ((map milk-mode-typescript-keymap))
     (define-key map (kbd "i") 'tide-documentation-at-point)
@@ -1093,7 +1096,7 @@ s#+STARTUP: hideblocks
     (milk-mode -1))
 
   (milk-global-mode)
-  (set 'sw/location 4277241)
+  (set 'sw/location 4409896)
 #+END_SRC
 **** Org-Mode
 #+BEGIN_SRC emacs-lisp
@@ -1244,7 +1247,7 @@ s#+STARTUP: hideblocks
     (setq ivy-use-virtual-buffers t)
     (setq enable-recursive-minibuffers t)
     (setq counsel-search-engine 'google))
-  (add-hook 'after-init-hook '(lambda () (ido-mode +1)))
+  (add-hook 'after-init-hook '(lambda () (ivy-mode +1)))
   ;; use ivy instead for now
   ;; (with-eval-after-load "ido"
   ;;   (setq ido-enable-prefix nil
