@@ -421,25 +421,27 @@
   (load-theme 'ample-flat t)
   ;; (load-theme 'doom-dark+ t)
   ;;(load-theme 'melancholy t)
-  (load-theme 'doom-dark+ t)
-  (load-theme 'ample-flat t)
+  ;;(load-theme 'doom-dark+ t)
+  (load-theme 'doom-henna t)
+  ;;(load-theme 'ample-flat t)
   (doom-themes-org-config)
   ;;(load-theme 'doom-challenger-deep t)
-  ;;(load-theme 'doom-sourcerer t)
+
   ;;(load-theme 'doom-ayu-dark t)
 
   ;;(load-theme 'eziam-dusk t)
 #+END_SRC
 **** Auto-Dim
 #+BEGIN_SRC emacs-lisp
-  (auto-dim-other-buffers-mode t)
+  ;;(auto-dim-other-buffers-mode t)
 #+END_SRC
 **** Smart Modeline
 #+BEGIN_SRC emacs-lisp
-  (require 'smart-mode-line)
-  (setq sml/no-confirm-load-theme t
-        sml/theme 'dark)
-  (add-hook 'after-init-hook #'sml/setup)
+  ;; (require 'smart-mode-line)
+  ;; (setq sml/no-confirm-load-theme t
+  ;;       sml/theme 'dark)
+  ;; (add-hook 'after-init-hook #'sml/setup)
+  (mood-line-mode)
 #+END_SRC
 **** Setup Powerline
 #+BEGIN_SRC emacs-lisp
@@ -711,8 +713,8 @@
 #+BEGIN_SRC emacs-lisp
   (setq backup-directory-alist
         `((".*" . ,temporary-file-directory)))
-  ;; (setq auto-save-file-name-transforms
-  ;;       `((".*" ,temporary-file-directory t)))
+  (setq auto-save-file-name-transforms
+        `((".*" ,temporary-file-directory t)))
 #+END_SRC
 **** Autosave Undo-Tree History
 #+BEGIN_SRC emacs-lisp
@@ -1247,7 +1249,7 @@
     (setq ivy-use-virtual-buffers t)
     (setq enable-recursive-minibuffers t)
     (setq counsel-search-engine 'google))
-  (add-hook 'after-init-hook '(lambda () (ivy-mode +1)))
+  (add-hook 'after-init-hook (lambda () (ivy-mode +1)))
   ;; use ivy instead for now
   ;; (with-eval-after-load "ido"
   ;;   (setq ido-enable-prefix nil
@@ -1511,12 +1513,15 @@
   (defun milk-slime-coding-defaults ()
     (let ((quicklisp-helper (expand-file-name "~/quicklisp/slime-helper.el")))
       (when (file-exists-p quicklisp-helper)))
+    (setq slime-company-completion 'fuzzy
+          slime-company-after-completion 'slime-company-just-one-space)
     (smartparens-strict-mode +1)
     (whitespace-mode -1))
 #+END_SRC
 **** Fancy Slime Contribs
 #+BEGIN_SRC emacs-lisp
   (setq slime-contribs '(slime-fancy))
+  (slime-setup '(slime-fancy slime-company))
 #+END_SRC
 **** Slime Repl History
 #+BEGIN_SRC emacs-lisp
