@@ -19,7 +19,7 @@
 (defvar milk-dir user-emacs-directory)
 (defvar milk-org (expand-file-name "milk.org" milk-dir))
 (defvar milk-report-headers nil)
-(defvar milk-message-depth 2)
+(defvar milk-message-depth 0)
 
 (defun untangle-custom ()
   (let ((file-name-handler-alist nil))
