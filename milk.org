@@ -269,10 +269,11 @@
 *** Sane Reset
 **** Font
 #+BEGIN_SRC emacs-lisp
-  (setq default-frame-alist
-        '(;; (font . "Source Code Pro for Powerline")
-          (font . "Input Mono Medium 17")
-          (vertical-scroll-bars . nil)))
+  ;; (setq default-frame-alist
+  ;;       '(;; (font . "Source Code Pro for Powerline")
+  ;;         (font . "Input Mono Medium 17")
+  ;;         (vertical-scroll-bars . nil)))
+  (set-keyboard-coding-system nil)
 #+END_SRC
 **** Disable Tool Bar
 #+BEGIN_SRC emacs-lisp
@@ -284,7 +285,7 @@
 #+END_SRC
 **** Disable Scroll Bar
 #+BEGIN_SRC emacs-lisp
-  (scroll-bar-mode 0)
+  ;; (scroll-bar-mode 0)
 #+END_SRC
 **** Disable Blinking Cursor
 #+BEGIN_SRC emacs-lisp
@@ -386,10 +387,10 @@
 *** Pallet Magic
 **** Pallet
 #+BEGIN_SRC emacs-lisp
-  (require 'cask "/home/dotmilk/silverware/cask/cask.el")
-  (cask-initialize)
+  (require 'cask "/home/admin/.cask/cask.el")
+  (cask--initialize)
   (add-hook 'after-init-hook 'exec-path-from-shell-initialize)
-  (require 'pallet)
+  (require 'pallet "/home/admin/.pallet/pallet.el")
   (pallet-mode t)
 #+END_SRC
 *** Visual Goodies
