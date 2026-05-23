@@ -1,4 +1,4 @@
-#+STARTUP: hideblocks
++STARTUP: hideblocks
 * .milk
 ** Base
 *** Pre-Configuration Fun
@@ -11,6 +11,7 @@
 **** Use Newest Byte Code
 #+BEGIN_SRC emacs-lisp
   (setq load-prefer-newer t)
+  (add-to-list 'warning-suppress-types '(lexical-binding))
 #+END_SRC
 **** You On Old Emacs?
 #+BEGIN_SRC emacs-lisp
@@ -81,7 +82,9 @@
 **** Custom File
 #+BEGIN_SRC emacs-lisp
   (setq custom-file (expand-file-name "custom.el" milk-private-dir))
-  (load custom-file)
+  (unless (file-exists-p custom-file)
+    (with-temp-file custom-file))
+  (load custom-file t)
 #+END_SRC
 **** Add Shit Above To 'load-path'
 #+BEGIN_SRC emacs-lisp
@@ -165,14 +168,427 @@
 
   ;; '(: bol "magit" (zero-or-more not-newline) eol)
 #+END_SRC
-*** Pallet Magic
-**** Pallet
+*** Package Management
+**** Package Archives And use-package
 #+BEGIN_SRC emacs-lisp
-  (require 'cask "/usr/local/share/emacs/site-lisp/cask/cask.el")
-  (cask-initialize)
-  (add-hook 'after-init-hook 'exec-path-from-shell-initialize)
-  (require 'pallet)
-  (pallet-mode t)
+  (require 'cl-lib)
+  (require 'package)
+
+  ;; Cask had GNU + MELPA.  NonGNU is now part of the normal modern ELPA set.
+  (setq package-archives
+        '(("gnu"    . "https://elpa.gnu.org/packages/")
+          ("nongnu" . "https://elpa.nongnu.org/nongnu/")
+          ("melpa"  . "https://melpa.org/packages/")))
+
+  ;; Preserve old Cask-ish behavior: let package.el pick normally.
+  ;; Uncomment this if you want GNU/NonGNU to beat MELPA snapshots:
+  ;;
+  ;; (setq package-archive-priorities
+  ;;       '(("gnu" . 20)
+  ;;         ("nongnu" . 10)
+  ;;         ("melpa" . 0)))
+
+  (unless (bound-and-true-p package--initialized)
+    (package-initialize))
+
+  ;; Emacs 32 has use-package, but this fallback keeps .milk portable.
+  (unless (require 'use-package nil t)
+    (unless package-archive-contents
+      (package-refresh-contents))
+    (package-install 'use-package)
+    (require 'use-package))
+
+  (require 'use-package-ensure nil t)
+  (setq use-package-always-ensure t)
+#+END_SRC
+
+**** Package Manifest
+#+BEGIN_SRC emacs-lisp
+  (defvar milk-packages
+    '(abyss-theme
+      aggressive-indent
+      alchemist
+      all-the-icons
+      ample-theme
+      ample-zen-theme
+      anzu
+      async
+      basic-mode
+      beacon
+      benchmark-init
+      bnfc
+      browse-kill-ring
+      brutalist-theme
+      cheat-sh
+      company
+      crux
+      cyberpunk-2019-theme
+      darkokai-theme
+      dash
+      default-text-scale
+      diff-hl
+      diminish
+      doom-themes
+      dylan-mode
+      eink-theme
+      elfeed
+      elfeed-org
+      elisp-format
+      elisp-slime-nav
+      elixir-mode
+      elm-mode
+      emms
+      epl
+      erlang
+      ess
+      ess-smart-equals
+      esup
+      exec-path-from-shell
+      expand-region
+      eziam-theme
+      f
+      flatland-black-theme
+      flatland-theme
+      flx
+      flx-ido
+      flycheck
+      flycheck-haskell
+      flyspell-popup
+      fold-dwim
+      fold-dwim-org
+      geiser
+      ghub
+      git-commit
+      gitattributes-mode
+      gitconfig-mode
+      gitignore-mode
+      go-mode
+      haml-mode
+      handlebars-mode
+      haskell-mode
+      ido-completing-read+
+      idris-mode
+      inf-ruby
+      intero
+      jabber
+      jade-mode
+      js-comint
+      js2-mode
+      js2-refactor
+      json-mode
+      json-reformat
+      json-snatcher
+      julia-mode
+      less-css-mode
+      let-alist
+      lfe-mode
+      live-py-mode
+      load-relative
+      macrostep
+      magit
+      magit-popup
+      memoize
+      monochrome-theme
+      multiple-cursors
+      nasm-mode
+      neotree
+      org
+      org-bullets
+      package-build
+      package-lint
+      parinfer
+      pdf-tools
+      pkg-info
+      popup
+      powerline
+      projectile
+      pug-mode
+      purescript-mode
+      pyenv-mode
+      pythonic
+      rainbow-delimiters
+      rainbow-mode
+      rand-theme
+      realgud
+      request
+      rich-minority
+      ruby-tools
+      rvm
+      s
+      sass-mode
+      scala-mode
+      scss-mode
+      seq
+      shut-up
+      slime
+      smart-mode-line
+      smart-mode-line-powerline-theme
+      smartparens
+      smex
+      sr-speedbar
+      string-inflection
+      tablist
+      tao-theme
+      transient
+      treepy
+      undo-tree
+      volatile-highlights
+      web-mode
+      which-key
+      with-editor
+      yaml-mode
+      yari
+      yasnippet
+      zel
+      zenburn-theme
+      zop-to-char)
+    "Packages managed by .milk.
+
+This replaces the old Cask/Pallet manifest.  `package-install`,
+`package-delete`, and the Package Menu keep this list persisted in
+`milk.org`.")
+#+END_SRC
+
+**** Package Recorder
+#+BEGIN_SRC emacs-lisp
+  (defvar milk-package-auto-install t
+    "When non-nil, install missing packages from `milk-packages` during startup.")
+
+  (defvar milk-package-builtins-are-installed t
+    "When non-nil, treat built-in packages like org/seq/transient as already installed.")
+
+  (defvar milk-package-install-failures nil
+    "List of package install failures from the last `.milk` package install run.")
+
+  (defvar milk-package--inhibit-recording nil
+    "Internal dynamic variable used while .milk itself is installing packages.")
+
+  (defun milk-package--name (thing)
+    "Return package symbol represented by THING."
+    (cond
+     ((symbolp thing) thing)
+     ((stringp thing) (intern thing))
+     ((and (fboundp 'package-desc-p)
+           (package-desc-p thing))
+      (package-desc-name thing))
+     (t nil)))
+
+  (defun milk-package--normalize-list (packages)
+    "Return PACKAGES as a sorted, duplicate-free symbol list."
+    (let (out)
+      (dolist (pkg packages)
+        (let ((name (milk-package--name pkg)))
+          (when name
+            (cl-pushnew name out))))
+      (sort out
+            (lambda (a b)
+              (string< (symbol-name a) (symbol-name b))))))
+
+  (defun milk-package-installed-p (pkg)
+    "Return non-nil if PKG is installed or, optionally, built in."
+    (or (package-installed-p pkg)
+        (and milk-package-builtins-are-installed
+             (fboundp 'package-built-in-p)
+             (package-built-in-p pkg))))
+
+  (defun milk-packages-missing ()
+    "Return packages from `milk-packages` that are not installed."
+    (let (missing)
+      (dolist (pkg (milk-package--normalize-list milk-packages))
+        (unless (milk-package-installed-p pkg)
+          (push pkg missing)))
+      (nreverse missing)))
+
+  (defun milk-package--manifest-source ()
+    "Return the replacement source for the `milk-packages` defvar."
+    (let ((packages (milk-package--normalize-list milk-packages)))
+      (concat
+       "(defvar milk-packages\n"
+       "  '("
+       (mapconcat #'symbol-name packages "\n    ")
+       ")\n"
+       "  \"Packages managed by .milk.\n\n"
+       "This replaces the old Cask/Pallet manifest.  `package-install`,\n"
+       "`package-delete`, and the Package Menu keep this list persisted in\n"
+       "`milk.org`.\")")))
+
+  (defun milk-packages-persist ()
+    "Persist `milk-packages` back into the `milk.org` manifest block."
+    (interactive)
+    (let ((source (milk-package--manifest-source))
+          (case-fold-search nil)
+          (buf (find-file-noselect milk-org)))
+      (with-current-buffer buf
+        (save-excursion
+          (goto-char (point-min))
+          (unless (re-search-forward "^(defvar[ \t\n]+milk-packages\\_>" nil t)
+            (error "Could not find `(defvar milk-packages ...)` in %s" milk-org))
+          (let ((beg (match-beginning 0)))
+            (goto-char beg)
+            (forward-sexp)
+            (delete-region beg (point))
+            (insert source)))
+        (save-buffer)))
+    (message "milk: persisted %d package(s) to %s"
+             (length milk-packages)
+             milk-org))
+
+  (defun milk-packages-add (pkg &optional no-persist)
+    "Add PKG to `milk-packages` and persist it unless NO-PERSIST is non-nil."
+    (interactive
+     (list
+      (intern
+       (completing-read
+        "Package: "
+        (mapcar (lambda (entry) (symbol-name (car entry)))
+                package-archive-contents)
+        nil nil))))
+    (let ((name (milk-package--name pkg)))
+      (unless name
+        (error "Could not resolve package name from %S" pkg))
+      (setq milk-packages
+            (milk-package--normalize-list
+             (cons name milk-packages)))
+      (setq package-selected-packages
+            (copy-sequence milk-packages))
+      (unless no-persist
+        (milk-packages-persist))
+      name))
+
+  (defun milk-packages-remove (pkg &optional no-persist)
+    "Remove PKG from `milk-packages` and persist it unless NO-PERSIST is non-nil."
+    (interactive
+     (list
+      (intern
+       (completing-read
+        "Remove package: "
+        (mapcar #'symbol-name milk-packages)
+        nil t))))
+    (let ((name (milk-package--name pkg)))
+      (setq milk-packages
+            (delq name
+                  (milk-package--normalize-list milk-packages)))
+      (setq package-selected-packages
+            (copy-sequence milk-packages))
+      (unless no-persist
+        (milk-packages-persist))
+      name))
+
+  (defun milk-packages-refresh ()
+    "Refresh package archive contents."
+    (interactive)
+    (package-refresh-contents)
+    (message "milk: package archives refreshed"))
+
+  (defun milk-packages-install-missing (&optional refresh)
+    "Install missing packages from `milk-packages`.
+
+With prefix argument REFRESH, refresh package archive contents first.
+Failures are recorded in `milk-package-install-failures` and do not abort
+the rest of startup."
+    (interactive "P")
+    (setq milk-packages (milk-package--normalize-list milk-packages))
+    (setq package-selected-packages (copy-sequence milk-packages))
+    (let ((missing (milk-packages-missing)))
+      (when refresh
+        (package-refresh-contents))
+      (when missing
+        (unless package-archive-contents
+          (package-refresh-contents))
+        (setq milk-package-install-failures nil)
+        (let ((milk-package--inhibit-recording t))
+          (dolist (pkg missing)
+            (condition-case err
+                (progn
+                  (message "milk: installing %s" pkg)
+                  (package-install pkg))
+              (error
+               (push (cons pkg err) milk-package-install-failures)
+               (message "milk: failed installing %s: %s"
+                        pkg
+                        (error-message-string err)))))))
+      (if milk-package-install-failures
+          (message "milk: %d package install failure(s); inspect `milk-package-install-failures`"
+                   (length milk-package-install-failures))
+        (message "milk: package set is satisfied"))))
+
+  (defun milk-packages-sync-from-selected ()
+    "Overwrite `milk-packages` with `package-selected-packages`, then persist.
+
+This is the closest modern equivalent of `pallet-init`."
+    (interactive)
+    (setq milk-packages
+          (milk-package--normalize-list package-selected-packages))
+    (milk-packages-persist))
+
+  (defun milk-packages-record-installed (&optional include-dependencies)
+    "Merge installed packages into `milk-packages`.
+
+Without prefix, use `package-selected-packages`.  With prefix
+INCLUDE-DEPENDENCIES, merge everything in `package-alist` too."
+    (interactive "P")
+    (setq milk-packages
+          (milk-package--normalize-list
+           (append milk-packages package-selected-packages)))
+    (when include-dependencies
+      (dolist (entry package-alist)
+        (push (car entry) milk-packages))
+      (setq milk-packages
+            (milk-package--normalize-list milk-packages)))
+    (setq package-selected-packages
+          (copy-sequence milk-packages))
+    (milk-packages-persist))
+
+  (defun milk-package--after-install (pkg &rest args)
+    "Advice for `package-install`: record manually selected PKG."
+    (let ((dont-select (car args)))
+      (unless (or milk-package--inhibit-recording dont-select)
+        (let ((name (milk-package--name pkg)))
+          (when name
+            (milk-packages-add name)
+            (message "milk: recorded installed package %s in milk.org" name))))))
+
+  (defun milk-package--after-delete (pkg-desc &rest args)
+    "Advice for `package-delete`: remove PKG-DESC from manifest when appropriate."
+    (let ((nosave (cadr args)))
+      (unless (or milk-package--inhibit-recording nosave)
+        (let ((name (milk-package--name pkg-desc)))
+          (when name
+            (milk-packages-remove name)
+            (message "milk: removed deleted package %s from milk.org" name))))))
+
+  (defun milk-package--after-package-menu-execute (&rest _)
+    "Advice for Package Menu execution; sync selected packages back to milk.org."
+    (unless milk-package--inhibit-recording
+      (milk-packages-sync-from-selected)))
+
+  ;; Keep Emacs' own selected package list aligned with .milk's manifest.
+  (setq milk-packages (milk-package--normalize-list milk-packages))
+  (setq package-selected-packages (copy-sequence milk-packages))
+
+  ;; Pallet-like behavior:
+  ;; M-x package-install -> package appears in milk.org.
+  ;; M-x package-delete  -> package disappears from milk.org.
+  (advice-add 'package-install :after #'milk-package--after-install)
+  (advice-add 'package-delete  :after #'milk-package--after-delete)
+
+  ;; Package Menu support:
+  ;; In list-packages, `i`/`d` then `x` will sync back to milk.org.
+  (advice-add 'package-menu-execute :after #'milk-package--after-package-menu-execute)
+
+  ;; For muscle memory if you type M-x install-package.
+  (defalias 'install-package #'package-install)
+
+  ;; Preserve the useful part of your old Pallet block.
+  (add-hook 'after-init-hook #'exec-path-from-shell-initialize)
+
+  ;; Make a raw dependency explicit because your sprunge helper calls
+  ;; `(require 'request)`.
+  (add-to-list 'milk-packages 'request)
+
+  ;; Bring the machine into conformance with the manifest.
+  (when milk-package-auto-install
+    (milk-packages-install-missing))
 #+END_SRC
 *** Visual Goodies
 **** Theme
@@ -701,101 +1117,58 @@
 *** Configure General Modes
 **** Milk Mode
 #+BEGIN_SRC emacs-lisp
-  (defgroup milk nil
-    "dotmilk."
-    :prefix "milk-"
-    :group 'applications)
+  ;;; milk mode
 
-  (defvar milk-mode-keymap nil)
-  (defvar milk-mode-magit-keymap nil)
-  (defvar milk-mode-info-keymap nil)
-  (defvar milk-mode-files-keymap nil)
+  (defvar milk-mode-map
+    (let ((map (make-sparse-keymap)))
 
-  (defgroup milk-key nil
-    "Key prefix for milk related key commands."
-    :prefix "milk-key-"
-    :group 'milk)
+      ;; root namespace
+      (define-prefix-command 'milk-prefix-map)
+      (define-key map (kbd "C-c m") 'milk-prefix-map)
 
-  (defgroup milk-key-magit nil
-    "Key prefix for magit related key commands under milk."
-    :prefix "milk-key-magit-"
-    :group 'milk)
+      ;; sub namespaces
+      (define-prefix-command 'milk-magit-map)
+      (define-prefix-command 'milk-info-map)
+      (define-prefix-command 'milk-files-map)
 
-  (defgroup milk-key-info nil
-    "Key prefix for information related key commands under milk."
-    :prefix "milk-key-info-"
-    :group 'milk)
+      ;; attach submaps
+      (define-key milk-prefix-map (kbd "m") 'milk-magit-map)
+      (define-key milk-prefix-map (kbd "i") 'milk-info-map)
+      (define-key milk-prefix-map (kbd "f") 'milk-files-map)
 
-  (defgroup milk-key-files nil
-    "Key prefix for file related key commands under milk"
-    :prefix "milk-key-files-"
-    :group 'milk)
+      ;; magit
+      (define-key milk-magit-map (kbd "s") #'magit-status)
+      (define-key milk-magit-map (kbd "l") #'magit-log-buffer-file)
+      (define-key milk-magit-map (kbd "b") #'milk-toggle-magit-blame)
 
+      ;; info
+      (define-key milk-info-map (kbd "c") #'sw/current)
+      (define-key milk-info-map (kbd "f") #'sw/forecast)
+      (define-key milk-info-map (kbd "e") #'export-to-blog)
 
-  (defcustom milk-key-command-prefix (kbd "C-c m")
-    "The prefix for milk related key commands."
-    :type 'string
-    :group 'milk)
+      ;; files
+      (define-key milk-files-map (kbd "c") #'milk-customize)
+      (define-key milk-files-map (kbd "r") #'recentf-ido-find-file)
+      (define-key milk-files-map (kbd "o") #'kill-other-buffers)
 
-  (defcustom milk-key-magit-command-prefix (kbd (concat milk-key-command-prefix "m"))
-    "The prefix for magit related key commands under milk."
-    :type 'string
-    :group 'milk)
-
-  (defcustom milk-key-info-command-prefix (kbd (concat milk-key-command-prefix "i"))
-    "The prefix for information related key commands under milk."
-    :type 'string
-    :group 'milk)
-
-  (defcustom milk-key-files-command-prefix (kbd (concat milk-key-command-prefix "f"))
-    "The prefix for file related key commands under milk."
-    :type 'string
-    :group 'milk)
-
-  (define-prefix-command 'milk-mode-keymap)
-  (define-prefix-command 'milk-mode-magit-keymap)
-  (define-prefix-command 'milk-mode-info-keymap)
-  (define-prefix-command 'milk-mode-files-keymap)
+      map))
 
   (define-minor-mode milk-mode
-    "Minor Mode To Scratch My Curiosity Itch.
-
-  \\{milk-mode-map\}"
+    "milk mode"
     :lighter " .m"
-    :group 'milk
-    :keymap `((,milk-key-command-prefix . milk-mode-keymap)
-              (,milk-key-magit-command-prefix . milk-mode-magit-keymap)
-              (,milk-key-info-command-prefix . milk-mode-info-keymap)
-              (,milk-key-files-command-prefix . milk-mode-files-keymap)))
+    :global t
+    :keymap milk-mode-map)
 
-  (let ((map milk-mode-keymap)))
+  (define-globalized-minor-mode milk-global-mode
+    milk-mode
+    (lambda () (milk-mode 1)))
 
-  (let ((map milk-mode-magit-keymap))
-    (define-key map (kbd "s") 'magit-status)
-    (define-key map (kbd "l") 'magit-log-buffer-file)
-    (define-key map (kbd "b") 'milk-toggle-magit-blame))
-
-  (let ((map milk-mode-info-keymap ))
-    (define-key map (kbd "c") 'sw/current)
-    (define-key map (kbd "f") 'sw/forecast)
-    (define-key map (kbd "e") 'export-to-blog))
-
-  (let ((map milk-mode-files-keymap))
-    (define-key map (kbd "c") 'milk-customize)
-    (define-key map (kbd "r") 'recentf-ido-find-file)
-    (define-key map (kbd "o") 'kill-other-buffers))
-
-  (define-globalized-minor-mode milk-global-mode milk-mode milk-on)
-
-  (defun milk-on ()
-    (milk-mode +1))
-
-  (defun milk-off ()
-    (milk-mode -1))
-
-  (milk-global-mode)
-  (set 'sw/location 1854964)
+  (milk-global-mode 1)
 #+END_SRC
+
+#+RESULTS:
+: 1854964
+
 **** Org-Mode
 #+BEGIN_SRC emacs-lisp
   (defun milk-org-mode-hook ()

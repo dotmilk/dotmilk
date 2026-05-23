@@ -8,7 +8,9 @@ transient
 emms
 jabber-avatar-cache
 .cask
-
+elfeed
+eln-cache
+tramp
 #ignore interlock
 .#*
 
