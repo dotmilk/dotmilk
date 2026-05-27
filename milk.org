@@ -599,7 +599,7 @@ INCLUDE-DEPENDENCIES, merge everything in `package-alist` too."
   ;;(load-theme 'nil-st t)
   (setq custom-safe-themes t)
   ;;(load-theme 'zenburn t)
-  (load-theme 'ample-flat t)
+  ;;(load-theme 'ample-flat t)
   ;;(setq rand-theme-wanted '(ample-light ample-flat))
   ;;(rand-theme)
   ;; (load-theme 'doom-city-lights t)

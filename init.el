@@ -1,4 +1,4 @@
-;;; init.el --- tiny .milk bootloader -*- lexical-binding: t; -*-
+\;;; init.el --- tiny .milk bootloader -*- lexical-binding: t; -*-
 
 (defconst emacs-start-time (current-time))
 
